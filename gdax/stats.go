@@ -46,6 +46,7 @@ func getStats(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 	q.Low = stats.Low
 	q.Open = stats.Open
 	q.Volume = stats.Volume
+	q.Delta = calcDelta(q.Price, q.Open)
 	m.data[pair] = q
 	m.Unlock()
 }
