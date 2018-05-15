@@ -20,6 +20,8 @@ type Market struct {
 // ticker: https://docs.gdax.com/#the-code-classprettyprinttickercode-channel
 // *** GDAX API documentation for websocket ticker channel does not show all available fields as of 2/11/2018
 type Quote struct {
+	Type string `json:"type"` // used to filter websocket messages
+
 	ID    string `json:"product_id"`
 	Price string `json:"price"` // getTrades/match
 	Size  string `json:"size"`  // getTrades/match
@@ -33,6 +35,28 @@ type Quote struct {
 	Low    string `json:"low_24h"`    // getStats/ticker
 	Open   string `json:"open_24h"`   // getStats/ticker
 	Volume string `json:"volume_24h"` // getStats/ticker
+}
+
+// Init initializes and returns an instance of the GDAX exchange
+func Init() *Market {
+	return &Market{
+		streaming: false,
+		pairs: []string{
+			"BTC-USD",
+			"BTC-EUR",
+			"BTC-GBP",
+			"BCH-USD",
+			"BCH-BTC",
+			"BCH-EUR",
+			"ETH-USD",
+			"ETH-BTC",
+			"ETH-EUR",
+			"LTC-USD",
+			"LTC-BTC",
+			"LTC-EUR",
+		},
+		data: make(map[string]Quote),
+	}
 }
 
 func (m *Market) Snapshot() []error {
@@ -57,7 +81,10 @@ func (m *Market) Snapshot() []error {
 }
 
 func (m *Market) Stream() error {
-
+	err := connectWS(m)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -67,31 +94,4 @@ func (m *Market) Print() {
 		fmt.Printf("%v: %+v", k, v)
 	}
 	m.RUnlock()
-}
-
-func (m *Market) Update() error {
-
-	return nil
-}
-
-// Init initializes and returns an instance of the GDAX exchange
-func Init() *Market {
-	return &Market{
-		streaming: false,
-		pairs: []string{
-			"BTC-USD",
-			"BTC-EUR",
-			"BTC-GBP",
-			"BCH-USD",
-			"BCH-BTC",
-			"BCH-EUR",
-			"ETH-USD",
-			"ETH-BTC",
-			"ETH-EUR",
-			"LTC-USD",
-			"LTC-BTC",
-			"LTC-EUR",
-		},
-		data: make(map[string]Quote),
-	}
 }
