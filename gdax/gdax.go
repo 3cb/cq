@@ -3,6 +3,10 @@ package gdax
 import (
 	"fmt"
 	"sync"
+
+	"github.com/gdamore/tcell"
+
+	"github.com/rivo/tview"
 )
 
 // Market conatins state data for the GDAX market
@@ -86,6 +90,66 @@ func (m *Market) Stream() error {
 		return err
 	}
 	return nil
+}
+
+func (m *Market) Display() {
+
+}
+
+func (m *Market) Table() *tview.Table {
+	headers := []string{
+		"Pair",
+		"Price",
+		"Change",
+		"Last Size",
+		"Bid",
+		"Ask",
+		"High",
+		"Low",
+		"Volume",
+	}
+
+	table := tview.NewTable().
+		SetBorders(false)
+
+	// col, rows := 9, 12
+	for i, header := range headers {
+		table.SetCell(0, i, tview.NewTableCell(header).
+			SetTextColor(tcell.ColorYellow).
+			SetAlign(tview.AlignRight))
+	}
+
+	for r := 1; r < len(m.pairs)+1; r++ {
+		pair := m.pairs[r-1]
+		table.SetCell(r, 0, tview.NewTableCell(pair).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 1, tview.NewTableCell(m.data[pair].Price).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 2, tview.NewTableCell(m.data[pair].Delta).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 3, tview.NewTableCell(m.data[pair].Size).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 4, tview.NewTableCell(m.data[pair].Bid).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 5, tview.NewTableCell(m.data[pair].Ask).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 6, tview.NewTableCell(m.data[pair].High).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 7, tview.NewTableCell(m.data[pair].Low).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+		table.SetCell(r, 8, tview.NewTableCell(m.data[pair].Volume).
+			// SetTextColor(headerColor).
+			SetAlign(tview.AlignRight))
+	}
+	return table
 }
 
 func (m *Market) Print() {
