@@ -13,7 +13,7 @@ func calcDelta(price string, open string) string {
 		if err != nil {
 			return delta
 		}
-		d := (p - o) / o
+		d := (p - o) / o * 100
 		delta = strconv.FormatFloat(d, 'E', -1, 64)
 	}
 	return delta
