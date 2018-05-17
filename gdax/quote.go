@@ -13,8 +13,6 @@ type Quote struct {
 	Price string `json:"price"` // getTrades/match
 	Size  string `json:"size"`  // getTrades/match
 
-	// Delta string // % change in price
-
 	Bid string `json:"best_bid"` // getTicker/ticker
 	Ask string `json:"best_ask"` // getTicker/ticker
 

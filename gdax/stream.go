@@ -41,7 +41,7 @@ func connectWS(m *Market) error {
 				quote := m.data[msg.ID]
 				quote.Price = msg.Price
 				quote.Size = msg.Size
-				quote.Delta = calcDelta(quote.Price, quote.Open)
+				// quote.Delta = calcDelta(quote.Price, quote.Open)
 				m.data[msg.ID] = quote
 				m.Unlock()
 			} else if msg.Type == "ticker" {
@@ -53,7 +53,7 @@ func connectWS(m *Market) error {
 				quote.Low = msg.Low
 				quote.Open = msg.Open
 				quote.Volume = msg.Volume
-				quote.Delta = calcDelta(quote.Price, quote.Open)
+				// quote.Delta = calcDelta(quote.Price, quote.Open)
 				m.data[msg.ID] = quote
 				m.Unlock()
 			}
