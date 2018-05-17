@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/3cb/cq/display"
 	"github.com/gdamore/tcell"
 
 	"github.com/rivo/tview"
@@ -15,30 +16,6 @@ type Market struct {
 	streaming bool
 	pairs     []string
 	data      map[string]Quote
-}
-
-// Quote contains most recent data for each crypto currency pair
-// Trailing comments denote which http request or websocket stream the data comes from
-// getTrades: https://docs.gdax.com/#get-trades
-// match: https://docs.gdax.com/#the-code-classprettyprintfullcode-channel
-// ticker: https://docs.gdax.com/#the-code-classprettyprinttickercode-channel
-// *** GDAX API documentation for websocket ticker channel does not show all available fields as of 2/11/2018
-type Quote struct {
-	Type string `json:"type"` // used to filter websocket messages
-
-	ID    string `json:"product_id"`
-	Price string `json:"price"` // getTrades/match
-	Size  string `json:"size"`  // getTrades/match
-
-	Delta string // % change in price
-
-	Bid string `json:"best_bid"` // getTicker/ticker
-	Ask string `json:"best_ask"` // getTicker/ticker
-
-	High   string `json:"high_24h"`   // getStats/ticker
-	Low    string `json:"low_24h"`    // getStats/ticker
-	Open   string `json:"open_24h"`   // getStats/ticker
-	Volume string `json:"volume_24h"` // getStats/ticker
 }
 
 // Init initializes and returns an instance of the GDAX exchange
@@ -104,8 +81,8 @@ func (m *Market) Table() *tview.Table {
 		"Last Size",
 		"Bid",
 		"Ask",
-		"High",
 		"Low",
+		"High",
 		"Volume",
 	}
 
@@ -121,32 +98,35 @@ func (m *Market) Table() *tview.Table {
 
 	for r := 1; r < len(m.pairs)+1; r++ {
 		pair := m.pairs[r-1]
-		table.SetCell(r, 0, tview.NewTableCell(pair).
-			// SetTextColor(headerColor).
+		quote := m.data[pair]
+		delta, color := display.FmtDelta(quote.Price, quote.Open)
+
+		table.SetCell(r, 0, tview.NewTableCell(display.FmtPair(pair)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 1, tview.NewTableCell(m.data[pair].Price).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 1, tview.NewTableCell(display.FmtPrice(quote.Price)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 2, tview.NewTableCell(m.data[pair].Delta).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 2, tview.NewTableCell(delta).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 3, tview.NewTableCell(m.data[pair].Size).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 3, tview.NewTableCell(display.FmtSize(quote.Size)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 4, tview.NewTableCell(m.data[pair].Bid).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 4, tview.NewTableCell(display.FmtPrice(quote.Bid)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 5, tview.NewTableCell(m.data[pair].Ask).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 5, tview.NewTableCell(display.FmtPrice(quote.Ask)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 6, tview.NewTableCell(m.data[pair].High).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 6, tview.NewTableCell(display.FmtPrice(quote.Low)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 7, tview.NewTableCell(m.data[pair].Low).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 7, tview.NewTableCell(display.FmtPrice(quote.High)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
-		table.SetCell(r, 8, tview.NewTableCell(m.data[pair].Volume).
-			// SetTextColor(headerColor).
+		table.SetCell(r, 8, tview.NewTableCell(display.FmtVolume(quote.Volume)).
+			SetTextColor(color).
 			SetAlign(tview.AlignRight))
 	}
 	return table
