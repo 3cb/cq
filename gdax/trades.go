@@ -37,7 +37,6 @@ func getTrades(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 	q.ID = pair
 	q.Price = slice[0].Price
 	q.Size = slice[0].Size
-	// q.Delta = calcDelta(q.Price, q.Open)
 	m.data[pair] = q
 	m.Unlock()
 }
