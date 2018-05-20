@@ -35,10 +35,6 @@ func main() {
 
 	table := exchanges["gdax"].Table()
 
-	// menu := tview.NewFrame(list).
-	// 	SetBorders(0, 0, 0, 0, 0, 0).
-	// 	SetBorder(true)
-
 	flex := tview.NewFlex().
 		AddItem(list, 30, 1, true).
 		AddItem(table, 0, 1, false)

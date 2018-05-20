@@ -89,7 +89,6 @@ func (m *Market) Table() *tview.Table {
 	table := tview.NewTable().
 		SetBorders(false)
 
-	// col, rows := 9, 12
 	for i, header := range headers {
 		table.SetCell(0, i, tview.NewTableCell(header).
 			SetTextColor(tcell.ColorYellow).
