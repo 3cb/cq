@@ -8,6 +8,13 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+// All formatting functions except 'FmtPair' pad the front of strings with empty spaces
+// to maintain column width.  Fixed column widths are set according to value type:
+// Price: 10
+// Delta: 9
+// Size: 13
+// Volume: 9
+
 // FmtPair formats product id to represent currency pair (i.e., "BTC/USD")
 func FmtPair(id string) string {
 	return strings.Join(strings.Split(id, "-"), "/")
@@ -26,7 +33,14 @@ func FmtPrice(price string) string {
 		return fmt.Sprintf("%.2f", num)
 	}
 	num = float64(int64(num*100000+0.5)) / 100000
-	return fmt.Sprintf("%.5f", num)
+	price = fmt.Sprintf("%.5f", num)
+	spc := 10 - len(price)
+	b := strings.Builder{}
+	for i := 0; i < spc; i++ {
+		b.WriteString(" ")
+	}
+	b.WriteString(price)
+	return b.String()
 }
 
 // FmtDelta calculates price delta and provides appropriate formatting
@@ -42,8 +56,13 @@ func FmtDelta(price string, open string) (string, tcell.Color) {
 
 		}
 		d := (p - o) / o * 100
+		delta := strconv.FormatFloat(d, 'f', 2, 64)
+		spc := 9 - len(delta) - 1 // extra "1" acounts for "%" character
 		b := strings.Builder{}
-		b.WriteString(strconv.FormatFloat(d, 'f', 2, 64))
+		for i := 0; i < spc; i++ {
+			b.WriteString(" ")
+		}
+		b.WriteString(delta)
 		b.WriteString("%")
 		if d >= 0 {
 			return b.String(), tcell.ColorGreen
@@ -60,8 +79,14 @@ func FmtSize(size string) string {
 		return "no data"
 	}
 	num = float64(int64(num*100000000+0.5)) / 100000000
-	return fmt.Sprintf("%.8f", num)
-
+	size = fmt.Sprintf("%.8f", num)
+	spc := 13 - len(size)
+	b := strings.Builder{}
+	for i := 0; i < spc; i++ {
+		b.WriteString(" ")
+	}
+	b.WriteString(size)
+	return b.String()
 }
 
 // FmtVolume formats volume data by rounding to nearest whole number
@@ -70,5 +95,12 @@ func FmtVolume(vol string) string {
 	if err != nil {
 		return "no data"
 	}
-	return fmt.Sprint(int64(num + 0.5))
+	vol = fmt.Sprint(int64(num + 0.5))
+	spc := 9 - len(vol)
+	b := strings.Builder{}
+	for i := 0; i < spc; i++ {
+		b.WriteString(" ")
+	}
+	b.WriteString(vol)
+	return b.String()
 }
