@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 
+	"github.com/3cb/cq/display"
 	"github.com/3cb/cq/gdax"
 	"github.com/rivo/tview"
 )
@@ -11,7 +12,7 @@ func main() {
 	snap := flag.Bool("snap", false, "get quote snapshot")
 	flag.Parse()
 
-	exchanges := make(map[string]exchange)
+	exchanges := make(map[string]Exchange)
 	exchanges["gdax"] = gdax.Init()
 	// exchanges["gemini"] = gemini.Init()
 	// exchanges["bitfinex"] = bitfinex.Init()
@@ -20,7 +21,6 @@ func main() {
 		// handle error slice here
 		exchanges["gdax"].Snapshot()
 	}
-	// exchanges["gdax"].Print()
 
 	app := tview.NewApplication()
 
@@ -36,17 +36,35 @@ func main() {
 	table := exchanges["gdax"].Table()
 
 	flex := tview.NewFlex().
-		AddItem(list, 30, 1, true).
+		SetFullScreen(true).
+		AddItem(list, 20, 1, true).
 		AddItem(table, 0, 1, false)
+
+	gdaxStream := make(chan display.Setter, 100)
+
+	go func() {
+		exchanges["gdax"].Stream(gdaxStream)
+
+		for {
+			select {
+			case upd := <-gdaxStream:
+				upd.UpdRow(table)
+				app.Draw()
+			}
+		}
+	}()
 
 	if err := app.SetRoot(flex, true).Run(); err != nil {
 		panic(err)
 	}
+
 }
 
-type exchange interface {
+// Exchange interface allows caller to get http snapshot price quotes,
+// stream live data via websocket, create tables for display in gui
+type Exchange interface {
 	Snapshot() []error
-	Stream() error
+	Stream(chan display.Setter) error
 	Table() *tview.Table
-	Print()
+	// Print()
 }

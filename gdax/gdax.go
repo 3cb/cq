@@ -1,7 +1,6 @@
 package gdax
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/3cb/cq/display"
@@ -40,6 +39,8 @@ func Init() *Market {
 	}
 }
 
+// Snapshot method performs concurrent http requests the GDAX REST API to get initial
+// market data
 func (m *Market) Snapshot() []error {
 	var e []error
 	errCh := make(chan error, (9 * len(m.pairs)))
@@ -61,18 +62,22 @@ func (m *Market) Snapshot() []error {
 	return e
 }
 
-func (m *Market) Stream() error {
-	err := connectWS(m)
+// Stream connects to websocket connection and starts goroutine to update state of GDAX
+// market with data from websocket messages
+func (m *Market) Stream(upd chan display.Setter) error {
+	err := connectWS(m, upd)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *Market) Display() {
+// func (m *Market) Display() {
 
-}
+// }
 
+// Table method uses maket data to create and return an
+// instance of tview.Table to caller application
 func (m *Market) Table() *tview.Table {
 	headers := []string{
 		"Pair",
@@ -96,45 +101,19 @@ func (m *Market) Table() *tview.Table {
 	}
 
 	for r := 1; r < len(m.pairs)+1; r++ {
+		m.RLock()
 		pair := m.pairs[r-1]
 		quote := m.data[pair]
-		delta, color := display.FmtDelta(quote.Price, quote.Open)
-
-		table.SetCell(r, 0, tview.NewTableCell(display.FmtPair(pair)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 1, tview.NewTableCell(display.FmtPrice(quote.Price)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 2, tview.NewTableCell(delta).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 3, tview.NewTableCell(display.FmtSize(quote.Size)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 4, tview.NewTableCell(display.FmtPrice(quote.Bid)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 5, tview.NewTableCell(display.FmtPrice(quote.Ask)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 6, tview.NewTableCell(display.FmtPrice(quote.Low)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 7, tview.NewTableCell(display.FmtPrice(quote.High)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
-		table.SetCell(r, 8, tview.NewTableCell(display.FmtVolume(quote.Volume)).
-			SetTextColor(color).
-			SetAlign(tview.AlignRight))
+		m.RUnlock()
+		quote.SetRow(table)
 	}
 	return table
 }
 
-func (m *Market) Print() {
-	m.RLock()
-	for k, v := range m.data {
-		fmt.Printf("%v: %+v", k, v)
-	}
-	m.RUnlock()
-}
+// func (m *Market) Print() {
+// 	m.RLock()
+// 	for k, v := range m.data {
+// 		fmt.Printf("%v: %+v", k, v)
+// 	}
+// 	m.RUnlock()
+// }

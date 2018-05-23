@@ -3,6 +3,7 @@ package gdax
 import (
 	"errors"
 
+	"github.com/3cb/cq/display"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,7 +15,7 @@ type Subscribe struct {
 	Channels   []string `json:"channels"`
 }
 
-func connectWS(m *Market) error {
+func connectWS(m *Market, upd chan display.Setter) error {
 	wsSub := &Subscribe{
 		Type:       "subscribe",
 		ProductIds: m.pairs,
@@ -34,6 +35,7 @@ func connectWS(m *Market) error {
 			if err != nil {
 				conn.Close()
 				// handle error here
+				return
 			}
 
 			if msg.Type == "match" {
@@ -42,6 +44,7 @@ func connectWS(m *Market) error {
 				quote.Price = msg.Price
 				quote.Size = msg.Size
 				m.data[msg.ID] = quote
+				upd <- quote
 				m.Unlock()
 			} else if msg.Type == "ticker" {
 				m.Lock()
@@ -53,6 +56,7 @@ func connectWS(m *Market) error {
 				quote.Open = msg.Open
 				quote.Volume = msg.Volume
 				m.data[msg.ID] = quote
+				upd <- quote
 				m.Unlock()
 			}
 			msg = Quote{}
