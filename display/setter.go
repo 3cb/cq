@@ -7,4 +7,5 @@ import "github.com/rivo/tview"
 type Setter interface {
 	SetRow(*tview.Table)
 	UpdRow(*tview.Table)
+	ClrBold(*tview.Table)
 }

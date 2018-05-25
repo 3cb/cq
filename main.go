@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/3cb/cq/display"
 	"github.com/3cb/cq/gdax"
@@ -49,6 +50,9 @@ func main() {
 			select {
 			case upd := <-gdaxStream:
 				upd.UpdRow(table)
+				app.Draw()
+				time.Sleep(100 * time.Millisecond)
+				upd.ClrBold(table)
 				app.Draw()
 			}
 		}

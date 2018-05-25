@@ -2,6 +2,7 @@ package gdax
 
 import (
 	"github.com/3cb/cq/display"
+	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
@@ -103,7 +104,8 @@ func (quote Quote) UpdRow(table *tview.Table) {
 		SetTextColor(color)
 	table.GetCell(row, 1).
 		SetText(display.FmtPrice(quote.Price)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 2).
 		SetText(delta).
 		SetTextColor(color)
@@ -125,4 +127,12 @@ func (quote Quote) UpdRow(table *tview.Table) {
 	table.GetCell(row, 8).
 		SetText(display.FmtVolume(quote.Volume)).
 		SetTextColor(color)
+}
+
+// ClrBold resets "Price" cell's attributes to remove bold font
+func (quote Quote) ClrBold(table *tview.Table) {
+	row := quote.FindTblRow()
+
+	table.GetCell(row, 1).
+		SetAttributes(tcell.AttrNone)
 }
