@@ -100,9 +100,9 @@ func (m *Market) Table() *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r < len(m.pairs)+1; r++ {
+	for r := 0; r < len(m.pairs); r++ {
 		m.RLock()
-		pair := m.pairs[r-1]
+		pair := m.pairs[r]
 		quote := m.data[pair]
 		m.RUnlock()
 		quote.SetRow(table)

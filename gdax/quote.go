@@ -32,30 +32,30 @@ type Quote struct {
 func (quote Quote) FindTblRow() int {
 	switch quote.ID {
 	case "BTC-USD":
-		return 1
-	case "BTC-EUR":
 		return 2
-	case "BTC-GBP":
-		return 3
-	case "BCH-USD":
+	case "BTC-EUR":
 		return 4
-	case "BCH-BTC":
-		return 5
-	case "BCH-EUR":
+	case "BTC-GBP":
 		return 6
-	case "ETH-USD":
-		return 7
-	case "ETH-BTC":
+	case "BCH-USD":
 		return 8
-	case "ETH-EUR":
-		return 9
-	case "LTC-USD":
+	case "BCH-BTC":
 		return 10
+	case "BCH-EUR":
+		return 12
+	case "ETH-USD":
+		return 14
+	case "ETH-BTC":
+		return 16
+	case "ETH-EUR":
+		return 18
+	case "LTC-USD":
+		return 20
 	case "LTC-BTC":
-		return 11
+		return 22
 	// case "LTC-EUR":
 	default:
-		return 12
+		return 24
 	}
 }
 
