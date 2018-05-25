@@ -4,6 +4,8 @@ import (
 	"flag"
 	"time"
 
+	"github.com/gdamore/tcell"
+
 	"github.com/3cb/cq/display"
 	"github.com/3cb/cq/gdax"
 	"github.com/rivo/tview"
@@ -22,6 +24,8 @@ func main() {
 		// handle error slice here
 		exchanges["gdax"].Snapshot()
 	}
+
+	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
 
 	app := tview.NewApplication()
 
@@ -61,7 +65,6 @@ func main() {
 	if err := app.SetRoot(flex, true).Run(); err != nil {
 		panic(err)
 	}
-
 }
 
 // Exchange interface allows caller to get http snapshot price quotes,
