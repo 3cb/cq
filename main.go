@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"time"
 
 	"github.com/gdamore/tcell"
@@ -12,18 +11,13 @@ import (
 )
 
 func main() {
-	snap := flag.Bool("snap", false, "get quote snapshot")
-	flag.Parse()
-
 	exchanges := make(map[string]Exchange)
 	exchanges["gdax"] = gdax.Init()
 	// exchanges["gemini"] = gemini.Init()
 	// exchanges["bitfinex"] = bitfinex.Init()
 
-	if *snap {
-		// handle error slice here
-		exchanges["gdax"].Snapshot()
-	}
+	// handle error slice here
+	exchanges["gdax"].Snapshot()
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
 
