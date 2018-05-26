@@ -101,32 +101,40 @@ func (quote Quote) UpdRow(table *tview.Table) {
 
 	table.GetCell(row, 0).
 		SetText(display.FmtPair(quote.ID)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 1).
 		SetText(display.FmtPrice(quote.Price)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 2).
 		SetText(delta).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 3).
 		SetText(display.FmtSize(quote.Size)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 4).
 		SetText(display.FmtPrice(quote.Bid)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 5).
 		SetText(display.FmtPrice(quote.Ask)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 6).
 		SetText(display.FmtPrice(quote.Low)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 7).
 		SetText(display.FmtPrice(quote.High)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 8).
 		SetText(display.FmtVolume(quote.Volume)).
-		SetTextColor(color)
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 }
 
 // ClrBold resets "Price" cell's attributes to remove bold font
@@ -134,5 +142,23 @@ func (quote Quote) ClrBold(table *tview.Table) {
 	row := quote.FindTblRow()
 
 	table.GetCell(row, 1).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 0).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 1).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 2).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 3).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 4).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 5).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 6).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 7).
+		SetAttributes(tcell.AttrNone)
+	table.GetCell(row, 8).
 		SetAttributes(tcell.AttrNone)
 }
