@@ -23,8 +23,8 @@ func main() {
 
 	app := tview.NewApplication()
 
-	list := tview.NewList().
-		AddItem("Overview", "", '1', nil).
+	menu := tview.NewList().
+		// AddItem("Overview", "", '1', nil).
 		AddItem("GDAX", "", '2', nil).
 		AddItem("Gemini", "", '3', nil).
 		AddItem("Bitfinex", "", '4', nil).
@@ -34,9 +34,13 @@ func main() {
 
 	table := exchanges["gdax"].Table()
 
-	flex := tview.NewFlex().
+	// quotes := tview.NewFrame(table).
+	// 	SetBorders(2, 2, 2, 2, 4, 4).
+	// 	AddText("Crypto Quotes", true, tview.AlignCenter, tcell.ColorWhite)
+
+	body := tview.NewFlex().
 		SetFullScreen(true).
-		AddItem(list, 20, 1, true).
+		AddItem(menu, 20, 1, true).
 		AddItem(table, 0, 1, false)
 
 	gdaxStream := make(chan display.Setter, 100)
@@ -56,7 +60,7 @@ func main() {
 		}
 	}()
 
-	if err := app.SetRoot(flex, true).Run(); err != nil {
+	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
 	}
 }
