@@ -34,10 +34,6 @@ func main() {
 
 	table := exchanges["gdax"].Table()
 
-	// quotes := tview.NewFrame(table).
-	// 	SetBorders(2, 2, 2, 2, 4, 4).
-	// 	AddText("Crypto Quotes", true, tview.AlignCenter, tcell.ColorWhite)
-
 	body := tview.NewFlex().
 		SetFullScreen(true).
 		AddItem(menu, 20, 1, true).
