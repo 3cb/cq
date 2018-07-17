@@ -4,16 +4,17 @@ import (
 	"github.com/rivo/tview"
 )
 
-// Setter is an interface that market quotes implement to initialize
+// Quoter is an interface that market quotes implement to initialize
 // and update data in gui table
-type Setter interface {
+type Quoter interface {
 	MarketID() string
+	PairID() string
 
 	// SetRow(*tview.Table)
 	UpdRow(*tview.Table)
 	ClrBold(*tview.Table)
 
-	PrimeOverview(chan Setter)
+	PrimeOverview(chan Quoter)
 	UpdOverviewRow(*tview.Table)
 	// ClrOverviewBold(*tview.Table)
 }
