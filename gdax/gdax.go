@@ -13,7 +13,7 @@ type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
-	data      map[string]cq.Quoter
+	data      map[string]Quote
 }
 
 // Init initializes and returns an instance of the GDAX exchange without quotes
@@ -34,7 +34,7 @@ func Init() *Market {
 			"LTC-BTC",
 			"LTC-EUR",
 		},
-		data: make(map[string]cq.Quoter),
+		data: make(map[string]Quote),
 	}
 }
 
@@ -111,6 +111,6 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 }
 
 // GetQuotes returns a map of all product pairs and their price quotes
-func (m *Market) GetQuotes() map[string]cq.Quoter {
+func (m *Market) GetQuotes() map[string]Quote {
 	return m.data
 }
