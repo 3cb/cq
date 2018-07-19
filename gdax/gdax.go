@@ -3,21 +3,20 @@ package gdax
 import (
 	"sync"
 
-	"github.com/3cb/cq/display"
+	"github.com/3cb/cq/cq"
 	"github.com/gdamore/tcell"
-
 	"github.com/rivo/tview"
 )
 
-// Market conatins state data for the GDAX market
+// Market conatins state data
 type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
-	data      map[string]Quote
+	data      map[string]cq.Quoter
 }
 
-// Init initializes and returns an instance of the GDAX exchange
+// Init initializes and returns an instance of the GDAX exchange without quotes
 func Init() *Market {
 	return &Market{
 		streaming: false,
@@ -35,13 +34,18 @@ func Init() *Market {
 			"LTC-BTC",
 			"LTC-EUR",
 		},
-		data: make(map[string]Quote),
+		data: make(map[string]cq.Quoter),
 	}
 }
 
-// Snapshot method performs concurrent http requests the GDAX REST API to get initial
+// GetPairs returns all products traded on the GDAX as a slice of strings
+func (m *Market) GetPairs() []string {
+	return m.pairs
+}
+
+// GetSnapshot method performs concurrent http requests the GDAX REST API to get initial
 // market data
-func (m *Market) Snapshot() []error {
+func (m *Market) GetSnapshot() []error {
 	var e []error
 	errCh := make(chan error, (9 * len(m.pairs)))
 
@@ -61,20 +65,6 @@ func (m *Market) Snapshot() []error {
 
 	return e
 }
-
-// Stream connects to websocket connection and starts goroutine to update state of GDAX
-// market with data from websocket messages
-func (m *Market) Stream(upd chan display.Setter) error {
-	err := connectWS(m, upd)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// func (m *Market) Display() {
-
-// }
 
 // Table method uses maket data to create and return an
 // instance of tview.Table to caller application
@@ -110,10 +100,17 @@ func (m *Market) Table() *tview.Table {
 	return table
 }
 
-// func (m *Market) Print() {
-// 	m.RLock()
-// 	for k, v := range m.data {
-// 		fmt.Printf("%v: %+v", k, v)
-// 	}
-// 	m.RUnlock()
-// }
+// Stream connects to websocket connection and starts goroutine to update state of GDAX
+// market with data from websocket messages
+func (m *Market) Stream(data chan cq.Quoter) error {
+	err := connectWS(m, data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetQuotes returns a map of all product pairs and their price quotes
+func (m *Market) GetQuotes() map[string]cq.Quoter {
+	return m.data
+}
