@@ -1,7 +1,7 @@
 package gdax
 
 import (
-	"github.com/3cb/cq/display"
+	"github.com/3cb/cq/cq"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
@@ -26,6 +26,16 @@ type Quote struct {
 	Low    string `json:"low_24h"`    // getStats/ticker
 	Open   string `json:"open_24h"`   // getStats/ticker
 	Volume string `json:"volume_24h"` // getStats/ticker
+}
+
+// MarketID returns the name of market as a string
+func (quote Quote) MarketID() string {
+	return "gdax"
+}
+
+// PairID returns name of product pair as a string
+func (quote Quote) PairID() string {
+	return quote.ID
 }
 
 // FindTblRow uses the pair ID to determine the quote's table row
@@ -63,33 +73,33 @@ func (quote Quote) FindTblRow() int {
 // SetRow sets tview.Table cells with data from an instance of Quote
 func (quote Quote) SetRow(table *tview.Table) {
 	r := quote.FindTblRow()
-	delta, color := display.FmtDelta(quote.Price, quote.Open)
+	delta, color := cq.FmtDelta(quote.Price, quote.Open)
 
-	table.SetCell(r, 0, tview.NewTableCell(display.FmtPair(quote.ID)).
+	table.SetCell(r, 0, tview.NewTableCell(cq.FmtPair(quote.ID)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 1, tview.NewTableCell(display.FmtPrice(quote.Price)).
+	table.SetCell(r, 1, tview.NewTableCell(cq.FmtPrice(quote.Price)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
 	table.SetCell(r, 2, tview.NewTableCell(delta).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 3, tview.NewTableCell(display.FmtSize(quote.Size)).
+	table.SetCell(r, 3, tview.NewTableCell(cq.FmtSize(quote.Size)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 4, tview.NewTableCell(display.FmtPrice(quote.Bid)).
+	table.SetCell(r, 4, tview.NewTableCell(cq.FmtPrice(quote.Bid)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 5, tview.NewTableCell(display.FmtPrice(quote.Ask)).
+	table.SetCell(r, 5, tview.NewTableCell(cq.FmtPrice(quote.Ask)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 6, tview.NewTableCell(display.FmtPrice(quote.Low)).
+	table.SetCell(r, 6, tview.NewTableCell(cq.FmtPrice(quote.Low)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 7, tview.NewTableCell(display.FmtPrice(quote.High)).
+	table.SetCell(r, 7, tview.NewTableCell(cq.FmtPrice(quote.High)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
-	table.SetCell(r, 8, tview.NewTableCell(display.FmtVolume(quote.Volume)).
+	table.SetCell(r, 8, tview.NewTableCell(cq.FmtVolume(quote.Volume)).
 		SetTextColor(color).
 		SetAlign(tview.AlignRight))
 }
@@ -97,14 +107,14 @@ func (quote Quote) SetRow(table *tview.Table) {
 // UpdRow refreshes table with new data from websocket message
 func (quote Quote) UpdRow(table *tview.Table) {
 	row := quote.FindTblRow()
-	delta, color := display.FmtDelta(quote.Price, quote.Open)
+	delta, color := cq.FmtDelta(quote.Price, quote.Open)
 
 	table.GetCell(row, 0).
-		SetText(display.FmtPair(quote.ID)).
+		SetText(cq.FmtPair(quote.ID)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 1).
-		SetText(display.FmtPrice(quote.Price)).
+		SetText(cq.FmtPrice(quote.Price)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 2).
@@ -112,27 +122,27 @@ func (quote Quote) UpdRow(table *tview.Table) {
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 3).
-		SetText(display.FmtSize(quote.Size)).
+		SetText(cq.FmtSize(quote.Size)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 4).
-		SetText(display.FmtPrice(quote.Bid)).
+		SetText(cq.FmtPrice(quote.Bid)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 5).
-		SetText(display.FmtPrice(quote.Ask)).
+		SetText(cq.FmtPrice(quote.Ask)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 6).
-		SetText(display.FmtPrice(quote.Low)).
+		SetText(cq.FmtPrice(quote.Low)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 7).
-		SetText(display.FmtPrice(quote.High)).
+		SetText(cq.FmtPrice(quote.High)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 8).
-		SetText(display.FmtVolume(quote.Volume)).
+		SetText(cq.FmtVolume(quote.Volume)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 }
@@ -161,4 +171,58 @@ func (quote Quote) ClrBold(table *tview.Table) {
 		SetAttributes(tcell.AttrNone)
 	table.GetCell(row, 8).
 		SetAttributes(tcell.AttrNone)
+}
+
+// PrimeOverview takes data from snapshot quote to initialize the
+// data in the overview display
+func (quote Quote) PrimeOverview(data chan cq.Quoter) {
+	data <- quote
+}
+
+// FindOverviewRow returns table row as integer
+func (quote Quote) FindOverviewRow() int {
+	switch quote.ID {
+	case "BTC/USD":
+		return 2
+	case "BTC/EUR":
+		return 4
+	case "BTC/GBP":
+		return 6
+	case "BTC/JPY":
+		return 8
+	case "BCH/USD":
+		return 10
+	case "BCH/BTC":
+		return 12
+	case "BCH/EUR":
+		return 14
+	case "ETH/USD":
+		return 16
+	case "ETH/BTC":
+		return 18
+	case "ETH/EUR":
+		return 20
+	case "ETH/GBP":
+		return 22
+	case "ETH/JPY":
+		return 24
+	case "LTC/USD":
+		return 26
+	case "LTC/BTC":
+		return 28
+	// case "LTC/EUR":
+	default:
+		return 30
+	}
+}
+
+// UpdOverviewRow resets price quote in overview display
+func (quote Quote) UpdOverviewRow(table *tview.Table) {
+	row := quote.FindOverviewRow()
+	_, color := cq.FmtDelta(quote.Price, quote.Open)
+
+	table.GetCell(row, 1).
+		SetText(cq.FmtPrice(quote.Price)).
+		SetTextColor(color).
+		SetAttributes(tcell.AttrBold)
 }
