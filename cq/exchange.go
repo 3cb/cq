@@ -19,14 +19,6 @@ type Exchange interface {
 	GetQuotes() map[string]Quoter
 }
 
-// Market conatins state data
-// type Market struct {
-// 	sync.RWMutex
-// 	streaming bool
-// 	pairs     []string
-// 	data      map[string]Quoter
-// }
-
 // MarketComp contains most current price for each pair from each exchange
 // type MarketComp struct {
 // 	GDAX     string
