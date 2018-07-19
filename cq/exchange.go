@@ -18,10 +18,3 @@ type Exchange interface {
 	// GetQuotes returns a map of price quotes for each product pair
 	GetQuotes() map[string]Quoter
 }
-
-// MarketComp contains most current price for each pair from each exchange
-// type MarketComp struct {
-// 	GDAX     string
-// 	Gemini   string
-// 	Bitfinex string
-// }
