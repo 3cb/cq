@@ -33,7 +33,7 @@ func getTrades(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 	}
 
 	m.Lock()
-	q := m.data[pair]
+	q := (m.data[pair]).(Quote)
 	q.ID = pair
 	q.Price = slice[0].Price
 	q.Size = slice[0].Size

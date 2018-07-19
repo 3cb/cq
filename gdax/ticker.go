@@ -38,7 +38,7 @@ func getTicker(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 	}
 
 	m.Lock()
-	q := m.data[pair]
+	q := (m.data[pair]).(Quote)
 	q.ID = pair
 	q.Bid = ticker.Bid
 	q.Ask = ticker.Ask

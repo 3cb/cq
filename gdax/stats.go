@@ -40,7 +40,7 @@ func getStats(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 	}
 
 	m.Lock()
-	q := m.data[pair]
+	q := (m.data[pair]).(Quote)
 	q.ID = pair
 	q.High = stats.High
 	q.Low = stats.Low

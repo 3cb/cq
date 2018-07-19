@@ -40,7 +40,7 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 
 			if msg.Type == "match" {
 				m.Lock()
-				quote := m.data[msg.ID]
+				quote := (m.data[msg.ID]).(Quote)
 				quote.Price = msg.Price
 				quote.Size = msg.Size
 				m.data[msg.ID] = quote
@@ -48,7 +48,7 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 				m.Unlock()
 			} else if msg.Type == "ticker" {
 				m.Lock()
-				quote := m.data[msg.ID]
+				quote := (m.data[msg.ID]).(Quote)
 				quote.Bid = msg.Bid
 				quote.Ask = msg.Ask
 				quote.High = msg.High
