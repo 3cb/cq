@@ -10,7 +10,7 @@ type Quoter interface {
 	MarketID() string
 	PairID() string
 
-	// SetRow(*tview.Table)
+	SetRow(*tview.Table)
 	UpdRow(*tview.Table)
 	ClrBold(*tview.Table)
 
