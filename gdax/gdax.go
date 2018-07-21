@@ -18,7 +18,7 @@ type Market struct {
 
 // Init initializes and returns an instance of the GDAX exchange without quotes
 func Init() *Market {
-	return &Market{
+	m := &Market{
 		streaming: false,
 		pairs: []string{
 			"BTC-USD",
@@ -36,6 +36,12 @@ func Init() *Market {
 		},
 		data: make(map[string]cq.Quoter),
 	}
+
+	for _, pair := range m.pairs {
+		m.data[pair] = Quote{}
+	}
+
+	return m
 }
 
 // GetPairs returns all products traded on the GDAX as a slice of strings
