@@ -11,6 +11,8 @@ type Exchange interface {
 	GetPairs() []string
 	// GetSnapshot makes http requests to prime display table with data
 	GetSnapshot() []error
+	// PrimeOverview takes all price quotes from exchange to seed overview display
+	PrimeOverview(chan Quoter)
 	// Table returns display table with initial data
 	Table() *tview.Table
 	// Stream launches goroutine to stream price data to display table

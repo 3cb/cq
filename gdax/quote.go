@@ -173,12 +173,6 @@ func (quote Quote) ClrBold(table *tview.Table) {
 		SetAttributes(tcell.AttrNone)
 }
 
-// PrimeOverview takes data from snapshot quote to initialize the
-// data in the overview display
-func (quote Quote) PrimeOverview(data chan cq.Quoter) {
-	data <- quote
-}
-
 // FindOverviewRow returns table row as integer
 func (quote Quote) FindOverviewRow() int {
 	switch quote.ID {

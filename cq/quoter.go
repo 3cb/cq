@@ -14,7 +14,6 @@ type Quoter interface {
 	UpdRow(*tview.Table)
 	ClrBold(*tview.Table)
 
-	PrimeOverview(chan Quoter)
 	UpdOverviewRow(*tview.Table)
 	// ClrOverviewBold(*tview.Table)
 }
