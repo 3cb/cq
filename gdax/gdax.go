@@ -74,9 +74,11 @@ func (m *Market) GetSnapshot() []error {
 
 // PrimeOverview ranges over data map of price Quotes and sends to data channel
 func (m *Market) PrimeOverview(data chan cq.Quoter) {
+	m.RLock()
 	for _, v := range m.data {
 		data <- v
 	}
+	m.RUnlock()
 }
 
 // Table method uses maket data to create and return an
