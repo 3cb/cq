@@ -63,7 +63,7 @@ func main() {
 				upd.UpdOverviewRow(overview)
 				app.Draw()
 
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(65 * time.Millisecond)
 				upd.ClrOverviewBold(overview)
 				app.Draw()
 			}
