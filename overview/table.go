@@ -55,7 +55,6 @@ func Table(exchanges map[string]cq.Exchange) *tview.Table {
 
 		table.SetCell(row, 3, tview.NewTableCell("").
 			SetAlign(tview.AlignRight))
-
 	}
 
 	return table
