@@ -42,13 +42,13 @@ func main() {
 			app.Stop()
 		})
 
-	overview := overview.Table(exchanges)
+	overviewTbl := overview.Table(exchanges)
 	// gdaxTable := exchanges["gdax"].Table()
 
 	body := tview.NewFlex().
 		SetFullScreen(true).
 		AddItem(menu, 20, 1, true).
-		AddItem(overview, 0, 1, false)
+		AddItem(overviewTbl, 0, 1, false)
 		// AddItem(gdaxTable, 0, 1, false)
 
 	data := make(chan cq.Quoter, 200)
@@ -58,13 +58,12 @@ func main() {
 
 		for {
 			if showOverview == true {
-
 				upd := <-data
-				upd.UpdOverviewRow(overview)
+				upd.UpdOverviewRow(overviewTbl)
 				app.Draw()
 
 				time.Sleep(65 * time.Millisecond)
-				upd.ClrOverviewBold(overview)
+				upd.ClrOverviewBold(overviewTbl)
 				app.Draw()
 			}
 		}
