@@ -42,9 +42,20 @@ func Table(exchanges map[string]cq.Exchange) *tview.Table {
 		SetAlign(tview.AlignRight))
 
 	for i, pair := range rowLbl {
-		table.SetCell(2*(i+1), 0, tview.NewTableCell(pair).
+		row := 2 * (i + 1)
+		table.SetCell(row, 0, tview.NewTableCell(pair).
 			SetTextColor(tcell.ColorWhite).
 			SetAlign(tview.AlignRight))
+
+		table.SetCell(row, 1, tview.NewTableCell("").
+			SetAlign(tview.AlignRight))
+
+		table.SetCell(row, 2, tview.NewTableCell("").
+			SetAlign(tview.AlignRight))
+
+		table.SetCell(row, 3, tview.NewTableCell("").
+			SetAlign(tview.AlignRight))
+
 	}
 
 	return table
