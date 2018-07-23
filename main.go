@@ -58,6 +58,7 @@ func main() {
 
 		for {
 			if showOverview == true {
+
 				upd := <-data
 				upd.UpdOverviewRow(overview)
 				app.Draw()
