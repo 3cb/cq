@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
 	"github.com/3cb/cq/overview"
@@ -59,6 +61,10 @@ func main() {
 
 				upd := <-data
 				upd.UpdOverviewRow(overview)
+				app.Draw()
+
+				time.Sleep(100 * time.Millisecond)
+				upd.ClrOverviewBold(overview)
 				app.Draw()
 			}
 		}

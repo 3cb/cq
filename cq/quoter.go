@@ -15,5 +15,5 @@ type Quoter interface {
 	ClrBold(*tview.Table)
 
 	UpdOverviewRow(*tview.Table)
-	// ClrOverviewBold(*tview.Table)
+	ClrOverviewBold(*tview.Table)
 }

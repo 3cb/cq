@@ -175,7 +175,7 @@ func (quote Quote) ClrBold(table *tview.Table) {
 
 // FindOverviewRow returns table row as integer
 func (quote Quote) FindOverviewRow() int {
-	switch quote.ID {
+	switch quote.PairID() {
 	case "BTC-USD":
 		return 2
 	case "BTC-EUR":
@@ -219,4 +219,21 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) {
 		SetText(cq.FmtPrice(quote.Price)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
+}
+
+// ClrOverviewBold removes bold font from Price cells in overview display
+func (quote Quote) ClrOverviewBold(table *tview.Table) {
+	row := quote.FindOverviewRow()
+
+	switch quote.MarketID() {
+	case "gdax":
+		table.GetCell(row, 1).
+			SetAttributes(tcell.AttrNone)
+	case "bitfinex":
+		table.GetCell(row, 2).
+			SetAttributes(tcell.AttrNone)
+	case "gemini":
+		table.GetCell(row, 3).
+			SetAttributes(tcell.AttrNone)
+	}
 }
