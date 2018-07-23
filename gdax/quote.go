@@ -2,6 +2,7 @@ package gdax
 
 import (
 	"github.com/3cb/cq/cq"
+	"github.com/3cb/cq/overview"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
@@ -173,46 +174,9 @@ func (quote Quote) ClrBold(table *tview.Table) {
 		SetAttributes(tcell.AttrNone)
 }
 
-// FindOverviewRow returns table row as integer
-func (quote Quote) FindOverviewRow() int {
-	switch quote.PairID() {
-	case "BTC-USD":
-		return 2
-	case "BTC-EUR":
-		return 4
-	case "BTC-GBP":
-		return 6
-	case "BTC-JPY":
-		return 8
-	case "BCH-USD":
-		return 10
-	case "BCH-BTC":
-		return 12
-	case "BCH-EUR":
-		return 14
-	case "ETH-USD":
-		return 16
-	case "ETH-BTC":
-		return 18
-	case "ETH-EUR":
-		return 20
-	case "ETH-GBP":
-		return 22
-	case "ETH-JPY":
-		return 24
-	case "LTC-USD":
-		return 26
-	case "LTC-BTC":
-		return 28
-	// case "LTC-EUR":
-	default:
-		return 30
-	}
-}
-
 // UpdOverviewRow resets price quote in overview display
 func (quote Quote) UpdOverviewRow(table *tview.Table) {
-	row := quote.FindOverviewRow()
+	row := overview.FindRow(quote)
 	_, color := cq.FmtDelta(quote.Price, quote.Open)
 
 	table.GetCell(row, 1).
@@ -223,17 +187,8 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) {
 
 // ClrOverviewBold removes bold font from Price cells in overview display
 func (quote Quote) ClrOverviewBold(table *tview.Table) {
-	row := quote.FindOverviewRow()
+	row := overview.FindRow(quote)
 
-	switch quote.MarketID() {
-	case "gdax":
-		table.GetCell(row, 1).
-			SetAttributes(tcell.AttrNone)
-	case "bitfinex":
-		table.GetCell(row, 2).
-			SetAttributes(tcell.AttrNone)
-	case "gemini":
-		table.GetCell(row, 3).
-			SetAttributes(tcell.AttrNone)
-	}
+	table.GetCell(row, 1).
+		SetAttributes(tcell.AttrNone)
 }
