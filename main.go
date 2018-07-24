@@ -16,7 +16,11 @@ func main() {
 	// exchanges["gemini"] = gemini.Init()
 	// exchanges["bitfinex"] = bitfinex.Init()
 
-	showOverview := true
+	overviewTbl := overview.Table(exchanges)
+	gdaxTbl := exchanges["gdax"].Table()
+
+	// showOverview := true
+	mktView := overviewTbl
 
 	// handle error slice here
 	exchanges["gdax"].GetSnapshot()
@@ -25,31 +29,33 @@ func main() {
 
 	app := tview.NewApplication()
 
+	body := tview.NewFlex().
+		SetFullScreen(true)
+
 	menu := tview.NewList().
 		AddItem("Overview", "", '1', func() {
-			showOverview = true
+			mktView = setView(body, mktView, overviewTbl)
+			app.Draw()
 		}).
 		AddItem("GDAX", "", '2', func() {
-			showOverview = false
+			mktView = setView(body, mktView, gdaxTbl)
+			app.Draw()
 		}).
 		AddItem("Gemini", "", '3', func() {
-			showOverview = false
+			mktView = setView(body, mktView, overviewTbl)
+			app.Draw()
 		}).
 		AddItem("Bitfinex", "", '4', func() {
-			showOverview = false
+			mktView = setView(body, mktView, overviewTbl)
+			app.Draw()
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.Stop()
 		})
 
-	overviewTbl := overview.Table(exchanges)
-	// gdaxTable := exchanges["gdax"].Table()
-
-	body := tview.NewFlex().
-		SetFullScreen(true).
+	body.
 		AddItem(menu, 20, 1, true).
 		AddItem(overviewTbl, 0, 1, false)
-		// AddItem(gdaxTable, 0, 1, false)
 
 	data := make(chan cq.Quoter, 200)
 
@@ -57,7 +63,7 @@ func main() {
 		exchanges["gdax"].Stream(data)
 
 		for {
-			if showOverview == true {
+			if mktView == overviewTbl {
 				upd := <-data
 				upd.UpdOverviewRow(overviewTbl)
 				app.Draw()
@@ -72,4 +78,12 @@ func main() {
 	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
 	}
+}
+
+func setView(body *tview.Flex, mktView *tview.Table, targetView *tview.Table) *tview.Table {
+	if mktView != targetView {
+		body.RemoveItem(mktView)
+		body.AddItem(targetView, 0, 1, false)
+	}
+	return targetView
 }
