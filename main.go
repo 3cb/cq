@@ -16,14 +16,13 @@ func main() {
 	// exchanges["gemini"] = gemini.Init()
 	// exchanges["bitfinex"] = bitfinex.Init()
 
+	// handle error slice here
+	exchanges["gdax"].GetSnapshot()
+
 	overviewTbl := overview.Table(exchanges)
 	gdaxTbl := exchanges["gdax"].Table()
 
-	// showOverview := true
 	mktView := overviewTbl
-
-	// handle error slice here
-	exchanges["gdax"].GetSnapshot()
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
 
@@ -63,15 +62,15 @@ func main() {
 		exchanges["gdax"].Stream(data)
 
 		for {
-			if mktView == overviewTbl {
-				upd := <-data
-				upd.UpdOverviewRow(overviewTbl)
-				app.Draw()
+			upd := <-data
+			upd.UpdOverviewRow(overviewTbl)
+			upd.UpdRow(gdaxTbl)
+			app.Draw()
 
-				time.Sleep(65 * time.Millisecond)
-				upd.ClrOverviewBold(overviewTbl)
-				app.Draw()
-			}
+			time.Sleep(65 * time.Millisecond)
+			upd.ClrOverviewBold(overviewTbl)
+			upd.ClrBold(gdaxTbl)
+			app.Draw()
 		}
 	}()
 
