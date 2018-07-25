@@ -71,40 +71,6 @@ func (quote Quote) FindTblRow() int {
 	}
 }
 
-// SetRow sets tview.Table cells with data from an instance of Quote
-func (quote Quote) SetRow(table *tview.Table) {
-	r := quote.FindTblRow()
-	delta, color := cq.FmtDelta(quote.Price, quote.Open)
-
-	table.SetCell(r, 0, tview.NewTableCell(cq.FmtPair(quote.ID)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 1, tview.NewTableCell(cq.FmtPrice(quote.Price)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 2, tview.NewTableCell(delta).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 3, tview.NewTableCell(cq.FmtSize(quote.Size)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 4, tview.NewTableCell(cq.FmtPrice(quote.Bid)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 5, tview.NewTableCell(cq.FmtPrice(quote.Ask)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 6, tview.NewTableCell(cq.FmtPrice(quote.Low)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 7, tview.NewTableCell(cq.FmtPrice(quote.High)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-	table.SetCell(r, 8, tview.NewTableCell(cq.FmtVolume(quote.Volume)).
-		SetTextColor(color).
-		SetAlign(tview.AlignRight))
-}
-
 // UpdRow refreshes table with new data from websocket message
 func (quote Quote) UpdRow(table *tview.Table) {
 	row := quote.FindTblRow()

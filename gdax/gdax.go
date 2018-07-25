@@ -105,13 +105,13 @@ func (m *Market) Table() *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 0; r < len(m.pairs); r++ {
-		m.RLock()
-		pair := m.pairs[r]
-		quote := m.data[pair]
-		m.RUnlock()
-		quote.SetRow(table)
+	for r := 1; r <= 27; r++ {
+		for c := 0; c <= 8; c++ {
+			table.SetCell(r, c, tview.NewTableCell("").
+				SetAlign(tview.AlignRight))
+		}
 	}
+
 	return table
 }
 

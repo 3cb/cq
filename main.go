@@ -56,7 +56,11 @@ func main() {
 		AddItem(menu, 20, 1, true).
 		AddItem(overviewTbl, 0, 1, false)
 
-	data := make(chan cq.Quoter, 200)
+	data := make(chan cq.Quoter, 500)
+
+	for _, exch := range exchanges {
+		exch.PrimeTables(data)
+	}
 
 	go func() {
 		exchanges["gdax"].Stream(data)
