@@ -72,8 +72,8 @@ func (m *Market) GetSnapshot() []error {
 	return e
 }
 
-// PrimeOverview ranges over data map of price Quotes and sends to data channel
-func (m *Market) PrimeOverview(data chan cq.Quoter) {
+// PrimeTables ranges over data map of price Quotes and sends to data channel
+func (m *Market) PrimeTables(data chan cq.Quoter) {
 	m.RLock()
 	for _, v := range m.data {
 		data <- v
