@@ -118,26 +118,10 @@ func (quote Quote) UpdRow(table *tview.Table) {
 func (quote Quote) ClrBold(table *tview.Table) {
 	row := quote.FindTblRow()
 
-	table.GetCell(row, 1).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 0).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 1).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 2).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 3).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 4).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 5).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 6).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 7).
-		SetAttributes(tcell.AttrNone)
-	table.GetCell(row, 8).
-		SetAttributes(tcell.AttrNone)
+	for col := 0; col <= 8; col++ {
+		table.GetCell(row, col).
+			SetAttributes(tcell.AttrNone)
+	}
 }
 
 // UpdOverviewRow resets price quote in overview display
