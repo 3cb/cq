@@ -7,7 +7,7 @@ import (
 )
 
 // Table creates table comparing prices from different crypto exchanges
-func Table(exchanges map[string]cq.Exchange) *tview.Table {
+func Table() *tview.Table {
 	rowLbl := []string{
 		"BTC/USD",
 		"BTC/EUR",

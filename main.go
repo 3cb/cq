@@ -19,7 +19,7 @@ func main() {
 	// handle error slice here
 	exchanges["gdax"].GetSnapshot()
 
-	overviewTbl := overview.Table(exchanges)
+	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table()
 
 	mktView := overviewTbl
