@@ -46,22 +46,30 @@ func Init() *Market {
 
 // GetPairs returns all products traded on the GDAX as a slice of strings
 func (m *Market) GetPairs() []string {
-	return m.pairs
+	m.RLock()
+	pairs := m.pairs
+	m.RUnlock()
+	return pairs
 }
 
 // GetSnapshot method performs concurrent http requests the GDAX REST API to get initial
 // market data
 func (m *Market) GetSnapshot() []error {
 	var e []error
-	errCh := make(chan error, (9 * len(m.pairs)))
+	m.RLock()
+	l := len(m.pairs)
+	m.RUnlock()
+	errCh := make(chan error, (9 * l))
 
 	wg := &sync.WaitGroup{}
-	wg.Add(3 * len(m.pairs))
+	wg.Add(3 * l)
+	m.RLock()
 	for _, pair := range m.pairs {
 		go getTrades(m, pair, wg, errCh)
 		go getStats(m, pair, wg, errCh)
 		go getTicker(m, pair, wg, errCh)
 	}
+	m.RUnlock()
 	wg.Wait()
 
 	close(errCh)
@@ -127,5 +135,8 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 
 // GetQuotes returns a map of all product pairs and their price quotes
 func (m *Market) GetQuotes() map[string]cq.Quoter {
-	return m.data
+	m.RLock()
+	data := m.data
+	m.RUnlock()
+	return data
 }
