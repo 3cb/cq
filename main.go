@@ -13,8 +13,6 @@ import (
 func main() {
 	exchanges := make(map[string]cq.Exchange)
 	exchanges["gdax"] = gdax.Init()
-	// exchanges["gemini"] = gemini.Init()
-	// exchanges["bitfinex"] = bitfinex.Init()
 
 	// handle error slice here
 	exchanges["gdax"].GetSnapshot()
@@ -28,31 +26,27 @@ func main() {
 
 	app := tview.NewApplication()
 
-	body := tview.NewFlex().
-		SetFullScreen(true)
+	view := make(chan *tview.Table)
 
 	menu := tview.NewList().
 		AddItem("Overview", "", '1', func() {
-			mktView = setView(body, mktView, overviewTbl)
-			app.Draw()
+			view <- overviewTbl
 		}).
 		AddItem("GDAX", "", '2', func() {
-			mktView = setView(body, mktView, gdaxTbl)
-			app.Draw()
+			view <- gdaxTbl
 		}).
 		AddItem("Gemini", "", '3', func() {
-			mktView = setView(body, mktView, overviewTbl)
-			app.Draw()
+			view <- overviewTbl
 		}).
 		AddItem("Bitfinex", "", '4', func() {
-			mktView = setView(body, mktView, overviewTbl)
-			app.Draw()
+			view <- overviewTbl
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.Stop()
 		})
 
-	body.
+	body := tview.NewFlex().
+		SetFullScreen(true).
 		AddItem(menu, 20, 1, true).
 		AddItem(overviewTbl, 0, 1, false)
 
@@ -66,27 +60,27 @@ func main() {
 		exchanges["gdax"].Stream(data)
 
 		for {
-			upd := <-data
-			upd.UpdOverviewRow(overviewTbl)
-			upd.UpdRow(gdaxTbl)
-			app.Draw()
+			select {
+			case upd := <-data:
+				upd.UpdOverviewRow(overviewTbl)
+				upd.UpdRow(gdaxTbl)
+				app.Draw()
 
-			time.Sleep(65 * time.Millisecond)
-			upd.ClrOverviewBold(overviewTbl)
-			upd.ClrBold(gdaxTbl)
-			app.Draw()
+				time.Sleep(85 * time.Millisecond)
+				upd.ClrOverviewBold(overviewTbl)
+				upd.ClrBold(gdaxTbl)
+				app.Draw()
+			case tbl := <-view:
+				if mktView != tbl {
+					body.RemoveItem(mktView)
+					body.AddItem(tbl, 0, 1, false)
+				}
+				mktView = tbl
+			}
 		}
 	}()
 
 	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
 	}
-}
-
-func setView(body *tview.Flex, mktView *tview.Table, targetView *tview.Table) *tview.Table {
-	if mktView != targetView {
-		body.RemoveItem(mktView)
-		body.AddItem(targetView, 0, 1, false)
-	}
-	return targetView
 }
