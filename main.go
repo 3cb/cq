@@ -27,19 +27,24 @@ func main() {
 	app := tview.NewApplication()
 
 	view := make(chan *tview.Table)
+	done := make(chan struct{})
 
 	menu := tview.NewList().
 		AddItem("Overview", "", '1', func() {
 			view <- overviewTbl
+			<-done
 		}).
 		AddItem("GDAX", "", '2', func() {
 			view <- gdaxTbl
+			<-done
 		}).
 		AddItem("Gemini", "", '3', func() {
 			view <- overviewTbl
+			<-done
 		}).
 		AddItem("Bitfinex", "", '4', func() {
 			view <- overviewTbl
+			<-done
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.Stop()
@@ -76,6 +81,7 @@ func main() {
 					body.AddItem(tbl, 0, 1, false)
 				}
 				mktView = tbl
+				done <- struct{}{}
 			}
 		}
 	}()
