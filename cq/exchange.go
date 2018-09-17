@@ -1,7 +1,7 @@
 package cq
 
 import (
-	"github.com/rivo/tview"
+	"github.com/3cb/tview"
 )
 
 // Exchange interface allows caller to get http snapshot price quotes,

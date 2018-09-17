@@ -3,8 +3,8 @@ package gdax
 import (
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/overview"
+	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
 )
 
 // Quote contains most recent data for each crypto currency pair
