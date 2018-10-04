@@ -6,7 +6,7 @@ import (
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
 	"github.com/3cb/cq/overview"
-	"github.com/3cb/tview"
+	"github.com/3cb/muttview"
 	"github.com/gdamore/tcell"
 )
 

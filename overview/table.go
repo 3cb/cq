@@ -2,7 +2,7 @@ package overview
 
 import (
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/tview"
+	"github.com/3cb/muttview"
 	"github.com/gdamore/tcell"
 )
 
