@@ -44,32 +44,24 @@ func Init() *Market {
 	return m
 }
 
-// GetPairs returns all products traded on the GDAX as a slice of strings
-func (m *Market) GetPairs() []string {
-	m.RLock()
-	pairs := m.pairs
-	m.RUnlock()
-	return pairs
-}
-
 // GetSnapshot method performs concurrent http requests the GDAX REST API to get initial
 // market data
 func (m *Market) GetSnapshot() []error {
 	var e []error
+
 	m.RLock()
-	l := len(m.pairs)
+	pairs := m.pairs
 	m.RUnlock()
+	l := len(pairs)
 	errCh := make(chan error, (9 * l))
 
 	wg := &sync.WaitGroup{}
 	wg.Add(3 * l)
-	m.RLock()
-	for _, pair := range m.pairs {
+	for _, pair := range pairs {
 		go getTrades(m, pair, wg, errCh)
 		go getStats(m, pair, wg, errCh)
 		go getTicker(m, pair, wg, errCh)
 	}
-	m.RUnlock()
 	wg.Wait()
 
 	close(errCh)
@@ -80,16 +72,7 @@ func (m *Market) GetSnapshot() []error {
 	return e
 }
 
-// PrimeTables ranges over data map of price Quotes and sends to data channel
-func (m *Market) PrimeTables(data chan cq.Quoter) {
-	m.RLock()
-	for _, v := range m.data {
-		data <- v
-	}
-	m.RUnlock()
-}
-
-// Table method uses maket data to create and return an
+// Table method uses market data to create and return an
 // instance of tview.Table to caller application
 func (m *Market) Table() *tview.Table {
 	headers := []string{
@@ -123,6 +106,16 @@ func (m *Market) Table() *tview.Table {
 	return table
 }
 
+// PrimeTables ranges over data map of price Quotes and sends to data channel
+func (m *Market) PrimeTables(data chan cq.Quoter) {
+	m.RLock()
+	quotes := m.data
+	m.RUnlock()
+	for _, v := range quotes {
+		data <- v
+	}
+}
+
 // Stream connects to websocket connection and starts goroutine to update state of GDAX
 // market with data from websocket messages
 func (m *Market) Stream(data chan cq.Quoter) error {
@@ -131,12 +124,4 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 		return err
 	}
 	return nil
-}
-
-// GetQuotes returns a map of all product pairs and their price quotes
-func (m *Market) GetQuotes() map[string]cq.Quoter {
-	m.RLock()
-	data := m.data
-	m.RUnlock()
-	return data
 }
