@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
 	"github.com/3cb/cq/overview"
@@ -13,12 +14,16 @@ import (
 func main() {
 	exchanges := make(map[string]cq.Exchange)
 	exchanges["gdax"] = gdax.Init()
+	exchanges["bitfinex"] = bitfinex.Init()
 
-	// handle error slice here
+	// handle error slices here *******************************
 	exchanges["gdax"].GetSnapshot()
+	exchanges["bitfinex"].GetSnapshot()
+	// handle error slices here *******************************
 
 	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table()
+	bitfinexTbl := exchanges["bitfinex"].Table()
 
 	mktView := overviewTbl
 
@@ -43,7 +48,7 @@ func main() {
 			<-done
 		}).
 		AddItem("Bitfinex", "", '4', func() {
-			view <- overviewTbl
+			view <- bitfinexTbl
 			<-done
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
@@ -62,18 +67,28 @@ func main() {
 	}
 
 	go func() {
+		// handle errors here *******************************
 		exchanges["gdax"].Stream(data)
+		exchanges["bitfinex"].Stream(data)
+		// handle errors here *******************************
 
 		for {
 			select {
 			case upd := <-data:
+				var t *tview.Table
+				switch upd.MarketID() {
+				case "gdax":
+					t = gdaxTbl
+				case "bitfinex":
+					t = bitfinexTbl
+				}
 				upd.UpdOverviewRow(overviewTbl)
-				upd.UpdRow(gdaxTbl)
+				upd.UpdRow(t)
 				app.Draw()
 
 				time.Sleep(85 * time.Millisecond)
 				upd.ClrOverviewBold(overviewTbl)
-				upd.ClrBold(gdaxTbl)
+				upd.ClrBold(t)
 				app.Draw()
 			case tbl := <-view:
 				if mktView != tbl {
