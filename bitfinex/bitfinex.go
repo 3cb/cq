@@ -47,33 +47,8 @@ func Init() *Market {
 	return m
 }
 
-// GetSnapshot performs http requests to the Bitfinex API to get initial market data
-func (m *Market) GetSnapshot() []error {
-	var e []error
-
-	m.RLock()
-	pairs := m.pairs
-	m.RUnlock()
-	l := len(pairs)
-	errCh := make(chan error, l)
-
-	wg := &sync.WaitGroup{}
-	wg.Add(l + 1)
-	go m.getTickers(errCh, wg)
-	for _, pair := range pairs {
-		go m.getTrades(pair, errCh, wg)
-	}
-	wg.Wait()
-
-	close(errCh)
-	for err := range errCh {
-		e = append(e, err)
-	}
-	return e
-}
-
 // Table returns an instance of tview.Table formatted for bitfinex ready for data
-func (m *Market) Table() *tview.Table {
+func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
 		"Price",
@@ -102,17 +77,46 @@ func (m *Market) Table() *tview.Table {
 		}
 	}
 
+	// handle errors here ***************
+	m.getSnapshot()
+
+	m.Lock()
+	data := m.data
+	m.Unlock()
+
+	for _, quote := range data {
+		quote.UpdRow(tbl)
+		quote.ClrBold(tbl)
+		quote.UpdOverviewRow(overviewTbl)
+		quote.ClrOverviewBold(overviewTbl)
+	}
+
 	return tbl
 }
 
-// PrimeTables ranges over data map of price Quotes and sends to data channel
-func (m *Market) PrimeTables(data chan cq.Quoter) {
+// getSnapshot performs http requests to the Bitfinex API to get initial market data
+func (m *Market) getSnapshot() []error {
+	var e []error
+
 	m.RLock()
-	quotes := m.data
+	pairs := m.pairs
 	m.RUnlock()
-	for _, v := range quotes {
-		data <- v
+	l := len(pairs)
+	errCh := make(chan error, l)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(l + 1)
+	go m.getTickers(errCh, wg)
+	for _, pair := range pairs {
+		go m.getTrades(pair, errCh, wg)
 	}
+	wg.Wait()
+
+	close(errCh)
+	for err := range errCh {
+		e = append(e, err)
+	}
+	return e
 }
 
 // Stream connects to Bitfinex websocket API and sends messages to data channel

@@ -16,14 +16,9 @@ func main() {
 	exchanges["gdax"] = gdax.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
 
-	// handle error slices here *******************************
-	exchanges["gdax"].GetSnapshot()
-	exchanges["bitfinex"].GetSnapshot()
-	// handle error slices here *******************************
-
 	overviewTbl := overview.Table()
-	gdaxTbl := exchanges["gdax"].Table()
-	bitfinexTbl := exchanges["bitfinex"].Table()
+	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
+	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
 
 	mktView := overviewTbl
 
@@ -61,10 +56,6 @@ func main() {
 		AddItem(overviewTbl, 0, 1, false)
 
 	data := make(chan cq.Quoter, 500)
-
-	for _, exch := range exchanges {
-		exch.PrimeTables(data)
-	}
 
 	go func() {
 		// handle errors here *******************************

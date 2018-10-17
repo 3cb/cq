@@ -44,37 +44,9 @@ func Init() *Market {
 	return m
 }
 
-// GetSnapshot method performs concurrent http requests the GDAX REST API to get initial
-// market data
-func (m *Market) GetSnapshot() []error {
-	var e []error
-
-	m.RLock()
-	pairs := m.pairs
-	m.RUnlock()
-	l := len(pairs)
-	errCh := make(chan error, (9 * l))
-
-	wg := &sync.WaitGroup{}
-	wg.Add(3 * l)
-	for _, pair := range pairs {
-		go getTrades(m, pair, wg, errCh)
-		go getStats(m, pair, wg, errCh)
-		go getTicker(m, pair, wg, errCh)
-	}
-	wg.Wait()
-
-	close(errCh)
-	for err := range errCh {
-		e = append(e, err)
-	}
-
-	return e
-}
-
 // Table method uses market data to create and return an
 // instance of tview.Table to caller application
-func (m *Market) Table() *tview.Table {
+func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
 		"Price",
@@ -103,17 +75,49 @@ func (m *Market) Table() *tview.Table {
 		}
 	}
 
+	// handle errors here ***************
+	m.getSnapshot()
+
+	m.Lock()
+	data := m.data
+	m.Unlock()
+
+	for _, quote := range data {
+		quote.UpdRow(table)
+		quote.ClrBold(table)
+		quote.UpdOverviewRow(overviewTbl)
+		quote.ClrOverviewBold(overviewTbl)
+	}
+
 	return table
 }
 
-// PrimeTables ranges over data map of price Quotes and sends to data channel
-func (m *Market) PrimeTables(data chan cq.Quoter) {
+// getSnapshot method performs concurrent http requests the GDAX REST API to get initial
+// market data
+func (m *Market) getSnapshot() []error {
+	var e []error
+
 	m.RLock()
-	quotes := m.data
+	pairs := m.pairs
 	m.RUnlock()
-	for _, v := range quotes {
-		data <- v
+	l := len(pairs)
+	errCh := make(chan error, (9 * l))
+
+	wg := &sync.WaitGroup{}
+	wg.Add(3 * l)
+	for _, pair := range pairs {
+		go getTrades(m, pair, wg, errCh)
+		go getStats(m, pair, wg, errCh)
+		go getTicker(m, pair, wg, errCh)
 	}
+	wg.Wait()
+
+	close(errCh)
+	for err := range errCh {
+		e = append(e, err)
+	}
+
+	return e
 }
 
 // Stream connects to websocket connection and starts goroutine to update state of GDAX
