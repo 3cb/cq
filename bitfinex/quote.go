@@ -97,7 +97,7 @@ func (quote Quote) UpdRow(table *tview.Table) {
 	row := quote.FindTblRow()
 
 	table.GetCell(row, 0).
-		SetText(formatPair(quote.ID)).
+		SetText(cq.FmtPair(quote.ID)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 1).
@@ -169,11 +169,6 @@ func (quote Quote) ClrOverviewBold(table *tview.Table) {
 
 	table.GetCell(row, 2).
 		SetAttributes(tcell.AttrNone)
-}
-
-func formatPair(id string) string {
-	slice := strings.Split(id, "-")
-	return strings.Join(slice, "/")
 }
 
 func formatDelta(change float64) string {
