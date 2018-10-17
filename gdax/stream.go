@@ -34,7 +34,6 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 			err := conn.ReadJSON(&msg)
 			if err != nil {
 				conn.Close()
-				// handle error here
 				return
 			}
 

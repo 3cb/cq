@@ -1,40 +1,41 @@
-package gdax
+package bitfinex
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/overview"
 	"github.com/3cb/muttview"
 	"github.com/gdamore/tcell"
 )
 
-// Quote contains most recent data for each crypto currency pair
-// Trailing comments denote which http request or websocket stream the data comes from
-// getTrades: https://docs.gdax.com/#get-trades
-// match: https://docs.gdax.com/#the-code-classprettyprintfullcode-channel
-// ticker: https://docs.gdax.com/#the-code-classprettyprinttickercode-channel
-// *** GDAX API documentation for websocket ticker channel does not show all available fields as of 2/11/2018
+// Quote represents data for a crypto trading pair on bitfinex exchange
+// data comes from websocket messages in array format
 type Quote struct {
-	Type string `json:"type"` // used to filter websocket messages
+	Symbol string
 
-	ID    string `json:"product_id"`
-	Price string `json:"price"` // getTrades/match
-	Size  string `json:"size"`  // getTrades/match
+	ID         string
+	Price      float64
+	Change     float64
+	ChangePerc float64
+	Size       float64
 
-	Bid string `json:"best_bid"` // getTicker/ticker
-	Ask string `json:"best_ask"` // getTicker/ticker
+	Bid float64
+	Ask float64
 
-	High   string `json:"high_24h"`   // getStats/ticker
-	Low    string `json:"low_24h"`    // getStats/ticker
-	Open   string `json:"open_24h"`   // getStats/ticker
-	Volume string `json:"volume_24h"` // getStats/ticker
+	Low    float64
+	High   float64
+	Open   float64
+	Volume float64
 }
 
 // MarketID returns the name of market as a string
 func (quote Quote) MarketID() string {
-	return "gdax"
+	return "bitfinex"
 }
 
-// PairID returns name of product pair as a string
+// PairID returns the name of product pair as a string
 func (quote Quote) PairID() string {
 	return quote.ID
 }
@@ -49,11 +50,11 @@ func (quote Quote) FindTblRow() int {
 		return 4
 	case "BTC-GBP":
 		return 6
+	case "BTC-JPY":
+		return 8
 	case "BCH-USD":
-		return 9
-	case "BCH-BTC":
 		return 11
-	case "BCH-EUR":
+	case "BCH-BTC":
 		return 13
 	case "ETH-USD":
 		return 16
@@ -61,27 +62,46 @@ func (quote Quote) FindTblRow() int {
 		return 18
 	case "ETH-EUR":
 		return 20
+	case "ETH-GBP":
+		return 22
+	case "ETH-JPY":
+		return 24
 	case "LTC-USD":
-		return 23
-	case "LTC-BTC":
-		return 25
-	// case "LTC-EUR":
-	default:
 		return 27
+	// case "LTC-BTC":
+	default:
+		return 29
 	}
 }
 
 // UpdRow refreshes table with new data from websocket message
 func (quote Quote) UpdRow(table *tview.Table) {
+	var color tcell.Color
+
+	if quote.ChangePerc >= 0 {
+		color = tcell.ColorGreen
+	} else {
+		color = tcell.ColorRed
+	}
+	price := strconv.FormatFloat(quote.Price, 'f', -1, 64)
+
+	delta := formatDelta(quote.ChangePerc)
+
+	size := strconv.FormatFloat(quote.Size, 'f', -1, 64)
+	bid := strconv.FormatFloat(quote.Bid, 'f', -1, 64)
+	ask := strconv.FormatFloat(quote.Ask, 'f', -1, 64)
+	low := strconv.FormatFloat(quote.Low, 'f', -1, 64)
+	high := strconv.FormatFloat(quote.High, 'f', -1, 64)
+	vol := strconv.FormatFloat(quote.Volume, 'f', -1, 64)
+
 	row := quote.FindTblRow()
-	delta, color := cq.FmtDelta(quote.Price, quote.Open)
 
 	table.GetCell(row, 0).
-		SetText(cq.FmtPair(quote.ID)).
+		SetText(formatPair(quote.ID)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 1).
-		SetText(cq.FmtPrice(quote.Price)).
+		SetText(cq.FmtPrice(price)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 2).
@@ -89,27 +109,27 @@ func (quote Quote) UpdRow(table *tview.Table) {
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 3).
-		SetText(cq.FmtSize(quote.Size)).
+		SetText(cq.FmtSize(size)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 4).
-		SetText(cq.FmtPrice(quote.Bid)).
+		SetText(cq.FmtPrice(bid)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 5).
-		SetText(cq.FmtPrice(quote.Ask)).
+		SetText(cq.FmtPrice(ask)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 6).
-		SetText(cq.FmtPrice(quote.Low)).
+		SetText(cq.FmtPrice(low)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 7).
-		SetText(cq.FmtPrice(quote.High)).
+		SetText(cq.FmtPrice(high)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 	table.GetCell(row, 8).
-		SetText(cq.FmtVolume(quote.Volume)).
+		SetText(cq.FmtVolume(vol)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 }
@@ -126,11 +146,19 @@ func (quote Quote) ClrBold(table *tview.Table) {
 
 // UpdOverviewRow resets price quote in overview display
 func (quote Quote) UpdOverviewRow(table *tview.Table) {
-	row := overview.FindRow(quote)
-	_, color := cq.FmtDelta(quote.Price, quote.Open)
+	var color tcell.Color
 
-	table.GetCell(row, 1).
-		SetText(cq.FmtPrice(quote.Price)).
+	row := overview.FindRow(quote)
+	if quote.Change >= 0 {
+		color = tcell.ColorGreen
+	} else {
+		color = tcell.ColorRed
+	}
+
+	price := strconv.FormatFloat(quote.Price, 'f', -1, 64)
+
+	table.GetCell(row, 2).
+		SetText(cq.FmtPrice(price)).
 		SetTextColor(color).
 		SetAttributes(tcell.AttrBold)
 }
@@ -139,6 +167,24 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) {
 func (quote Quote) ClrOverviewBold(table *tview.Table) {
 	row := overview.FindRow(quote)
 
-	table.GetCell(row, 1).
+	table.GetCell(row, 2).
 		SetAttributes(tcell.AttrNone)
+}
+
+func formatPair(id string) string {
+	slice := strings.Split(id, "-")
+	return strings.Join(slice, "/")
+}
+
+func formatDelta(change float64) string {
+	change *= 100
+	delta := strconv.FormatFloat(change, 'f', 2, 64)
+	spc := 9 - len(delta) - 1 // extra "1" acounts for "%" character
+	b := strings.Builder{}
+	for i := 0; i < spc; i++ {
+		b.WriteString(" ")
+	}
+	b.WriteString(delta)
+	b.WriteString("%")
+	return b.String()
 }

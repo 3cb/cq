@@ -1,4 +1,4 @@
-package gdax
+package bitfinex
 
 import (
 	"sync"
@@ -8,33 +8,36 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-// Market conatins state data
+// Market contains state data
 type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
+	sockets   map[string]int
 	data      map[string]cq.Quoter
 }
 
-// Init initializes and returns an instance of the GDAX exchange without quotes
+// Init creates instance of a bitfinex market without quotes
 func Init() *Market {
 	m := &Market{
 		streaming: false,
 		pairs: []string{
-			"BTC-USD",
-			"BTC-EUR",
-			"BTC-GBP",
-			"BCH-USD",
-			"BCH-BTC",
-			"BCH-EUR",
-			"ETH-USD",
-			"ETH-BTC",
-			"ETH-EUR",
-			"LTC-USD",
-			"LTC-BTC",
-			"LTC-EUR",
+			"tBTCUSD",
+			"tBTCEUR",
+			"tBTCGBP",
+			"tBTCJPY",
+			"tBCHUSD",
+			"tBCHBTC",
+			"tETHUSD",
+			"tETHBTC",
+			"tETHEUR",
+			"tETHGBP",
+			"tETHJPY",
+			"tLTCUSD",
+			"tLTCBTC",
 		},
-		data: make(map[string]cq.Quoter),
+		sockets: make(map[string]int),
+		data:    make(map[string]cq.Quoter),
 	}
 
 	for _, pair := range m.pairs {
@@ -44,8 +47,7 @@ func Init() *Market {
 	return m
 }
 
-// Table method uses market data to create and return an
-// instance of tview.Table to caller application
+// Table returns an instance of tview.Table formatted for bitfinex ready for data
 func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
@@ -59,18 +61,18 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 		"Volume",
 	}
 
-	table := tview.NewTable().
+	tbl := tview.NewTable().
 		SetBorders(false)
 
 	for i, header := range headers {
-		table.SetCell(0, i, tview.NewTableCell(header).
+		tbl.SetCell(0, i, tview.NewTableCell(header).
 			SetTextColor(tcell.ColorYellow).
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 27; r++ {
+	for r := 1; r <= 33; r++ {
 		for c := 0; c <= 8; c++ {
-			table.SetCell(r, c, tview.NewTableCell("").
+			tbl.SetCell(r, c, tview.NewTableCell("").
 				SetAlign(tview.AlignRight))
 		}
 	}
@@ -83,17 +85,16 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(table)
-		quote.ClrBold(table)
+		quote.UpdRow(tbl)
+		quote.ClrBold(tbl)
 		quote.UpdOverviewRow(overviewTbl)
 		quote.ClrOverviewBold(overviewTbl)
 	}
 
-	return table
+	return tbl
 }
 
-// getSnapshot method performs concurrent http requests the GDAX REST API to get initial
-// market data
+// getSnapshot performs http requests to the Bitfinex API to get initial market data
 func (m *Market) getSnapshot() []error {
 	var e []error
 
@@ -101,14 +102,13 @@ func (m *Market) getSnapshot() []error {
 	pairs := m.pairs
 	m.RUnlock()
 	l := len(pairs)
-	errCh := make(chan error, (9 * l))
+	errCh := make(chan error, l)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(3 * l)
+	wg.Add(l + 1)
+	go m.getTickers(errCh, wg)
 	for _, pair := range pairs {
-		go getTrades(m, pair, wg, errCh)
-		go getStats(m, pair, wg, errCh)
-		go getTicker(m, pair, wg, errCh)
+		go m.getTrades(pair, errCh, wg)
 	}
 	wg.Wait()
 
@@ -116,12 +116,11 @@ func (m *Market) getSnapshot() []error {
 	for err := range errCh {
 		e = append(e, err)
 	}
-
 	return e
 }
 
-// Stream connects to websocket connection and starts goroutine to update state of GDAX
-// market with data from websocket messages
+// Stream connects to Bitfinex websocket API and sends messages to data channel
+// to update market and overview tables
 func (m *Market) Stream(data chan cq.Quoter) error {
 	err := connectWS(m, data)
 	if err != nil {
