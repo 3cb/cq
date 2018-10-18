@@ -73,20 +73,20 @@ func main() {
 				case "bitfinex":
 					t = bitfinexTbl
 				}
-				upd.UpdOverviewRow(overviewTbl)
-				upd.UpdRow(t)
-				app.Draw()
+				app.QueueUpdate(upd.UpdOverviewRow(overviewTbl))
+				app.QueueUpdate(upd.UpdRow(t))
 
 				time.Sleep(85 * time.Millisecond)
-				upd.ClrOverviewBold(overviewTbl)
-				upd.ClrBold(t)
-				app.Draw()
+				app.QueueUpdate(upd.ClrOverviewBold(overviewTbl))
+				app.QueueUpdate(upd.ClrBold(t))
 			case tbl := <-view:
 				if mktView != tbl {
-					body.RemoveItem(mktView)
-					body.AddItem(tbl, 0, 1, false)
+					app.QueueUpdate(func() {
+						body.RemoveItem(mktView)
+						body.AddItem(tbl, 0, 1, false)
+						mktView = tbl
+					})
 				}
-				mktView = tbl
 				done <- struct{}{}
 			}
 		}

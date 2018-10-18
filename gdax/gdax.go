@@ -83,10 +83,10 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(table)
-		quote.ClrBold(table)
-		quote.UpdOverviewRow(overviewTbl)
-		quote.ClrOverviewBold(overviewTbl)
+		quote.UpdRow(table)()
+		quote.ClrBold(table)()
+		quote.UpdOverviewRow(overviewTbl)()
+		quote.ClrOverviewBold(overviewTbl)()
 	}
 
 	return table
