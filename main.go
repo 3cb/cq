@@ -81,11 +81,9 @@ func main() {
 				app.QueueUpdate(upd.ClrBold(t))
 			case tbl := <-view:
 				if mktView != tbl {
-					app.QueueUpdate(func() {
-						body.RemoveItem(mktView)
-						body.AddItem(tbl, 0, 1, false)
-						mktView = tbl
-					})
+					body.RemoveItem(mktView)
+					body.AddItem(tbl, 0, 1, false)
+					mktView = tbl
 				}
 				done <- struct{}{}
 			}
