@@ -16,7 +16,10 @@ func (m *Market) getTickers(errCh chan<- error, wg *sync.WaitGroup) {
 	api := "https://api.bitfinex.com/v2/tickers?symbols="
 	b := strings.Builder{}
 	b.WriteString(api)
-	for i, pair := range m.pairs {
+	m.Lock()
+	pairs := m.pairs
+	m.Unlock()
+	for i, pair := range pairs {
 		b.WriteString(pair)
 		if i < len(m.pairs)-1 {
 			b.WriteString(",")
