@@ -65,17 +65,7 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 
 			switch msg := data.(type) {
 			case map[string]interface{}:
-				event := (msg["event"]).(string)
-				if event == "subscribed" {
-					chanID := (msg["chanId"]).(float64)
-					symbol := (msg["symbol"]).(string)
-					switch channel := (msg["channel"]).(string); channel {
-					case "ticker":
-						store.Tickers[chanID] = symbol
-					case "trades":
-						store.Trades[chanID] = symbol
-					}
-				}
+				registerChannelID(msg, &store)
 			case []interface{}:
 				id := (msg[0]).(float64)
 				switch x := msg[1].(type) {
@@ -103,6 +93,20 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 	}
 
 	return nil
+}
+
+func registerChannelID(msg map[string]interface{}, store *ChannelStore) {
+	event := (msg["event"]).(string)
+	if event == "subscribed" {
+		chanID := (msg["chanId"]).(float64)
+		symbol := (msg["symbol"]).(string)
+		switch channel := (msg["channel"]).(string); channel {
+		case "ticker":
+			store.Tickers[chanID] = symbol
+		case "trades":
+			store.Trades[chanID] = symbol
+		}
+	}
 }
 
 // queryStore uses channel id to get pair string
