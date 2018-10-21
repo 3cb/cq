@@ -2,6 +2,7 @@ package bitfinex
 
 import (
 	"errors"
+	"math"
 
 	"github.com/3cb/cq/cq"
 	"github.com/gorilla/websocket"
@@ -64,11 +65,15 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 			}
 
 			switch msg := data.(type) {
+			// this case asserts subsciption confirmation
 			case map[string]interface{}:
 				registerChannelID(msg, &store)
+
+			// this case asserts snapshots and updates
 			case []interface{}:
 				id := (msg[0]).(float64)
 				switch x := msg[1].(type) {
+				// this case asserts ticker snapshot and updates or trades snapshot
 				case []interface{}:
 					pair, _ := queryStore(&store, id)
 					if upd, ok := (x[0]).([]interface{}); ok {
@@ -76,6 +81,8 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 					} else {
 						tickerToQuote(m, x, pair, dataCh)
 					}
+
+				// this case asserts trades updates
 				case string:
 					if msg[1] == "tu" {
 						upd := (msg[2]).([]interface{})
@@ -138,7 +145,7 @@ func tickerToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Q
 func tradeToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Quoter) {
 	m.Lock()
 	q := (m.data[pair]).(Quote)
-	q.Size = (upd[2]).(float64)
+	q.Size = math.Abs((upd[2]).(float64))
 	q.Price = (upd[3]).(float64)
 	m.data[pair] = q
 	dataCh <- q

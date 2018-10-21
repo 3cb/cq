@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
@@ -90,7 +91,7 @@ func (m *Market) getTrades(pair string, errCh chan<- error, wg *sync.WaitGroup) 
 	for _, val := range data {
 		q := (m.data[pair]).(Quote)
 		q.Price = (val[3]).(float64)
-		q.Size = (val[2]).(float64)
+		q.Size = math.Abs((val[2]).(float64))
 		m.data[pair] = q
 	}
 	m.Unlock()
