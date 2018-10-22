@@ -13,7 +13,6 @@ type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
-	sockets   map[string]int
 	data      map[string]cq.Quoter
 }
 
@@ -36,8 +35,7 @@ func Init() *Market {
 			"tLTCUSD",
 			"tLTCBTC",
 		},
-		sockets: make(map[string]int),
-		data:    make(map[string]cq.Quoter),
+		data: make(map[string]cq.Quoter),
 	}
 
 	for _, pair := range m.pairs {
