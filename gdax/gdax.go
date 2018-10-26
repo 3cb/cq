@@ -30,9 +30,12 @@ func Init() *Market {
 			"ETH-USD",
 			"ETH-BTC",
 			"ETH-EUR",
+			"ETH-GBP",
 			"LTC-USD",
 			"LTC-BTC",
 			"LTC-EUR",
+			"ZRX-USD",
+			"ZRX-BTC",
 		},
 		data: make(map[string]cq.Quoter),
 	}
@@ -68,7 +71,7 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 27; r++ {
+	for r := 1; r <= 34; r++ {
 		for c := 0; c <= 8; c++ {
 			table.SetCell(r, c, tview.NewTableCell("").
 				SetAlign(tview.AlignRight))

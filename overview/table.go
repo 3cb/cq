@@ -24,6 +24,10 @@ func Table() *tview.Table {
 		"LTC/USD",
 		"LTC/BTC",
 		"LTC/EUR",
+		"ZEC/USD",
+		"ZEC/BTC",
+		"ZRX/USD",
+		"ZRX/BTC",
 	}
 
 	table := tview.NewTable().
@@ -91,9 +95,17 @@ func FindRow(quote cq.Quoter) int {
 		return 26
 	case "LTC-BTC":
 		return 28
-	// case "LTC-EUR":
-	default:
+	case "LTC-EUR":
 		return 30
+	case "ZEC-USD":
+		return 32
+	case "ZEC-BTC":
+		return 34
+	case "ZRX-USD":
+		return 36
+	// case "ZRX-BTC":
+	default:
+		return 38
 	}
 }
 

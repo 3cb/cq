@@ -68,9 +68,17 @@ func (quote Quote) FindTblRow() int {
 		return 24
 	case "LTC-USD":
 		return 27
-	// case "LTC-BTC":
-	default:
+	case "LTC-BTC":
 		return 29
+	case "ZEC-USD":
+		return 32
+	case "ZEC-BTC":
+		return 34
+	case "ZRX-USD":
+		return 37
+	// case "ZRX-BTC":
+	default:
+		return 39
 	}
 }
 
