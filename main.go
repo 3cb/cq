@@ -20,6 +20,7 @@ func main() {
 	exchanges["gemini"] = gemini.Init()
 
 	// Create tables with initial data from http requests
+	println("Building tables...")
 	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
 	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
@@ -92,12 +93,14 @@ func main() {
 		}
 	}()
 
+	println("Connecting to exchanges...")
 	// handle errors here *******************************
 	exchanges["gdax"].Stream(data)
 	exchanges["bitfinex"].Stream(data)
 	exchanges["gemini"].Stream(data)
 	// handle errors here *******************************
 
+	println("Launching app...")
 	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
 	}
