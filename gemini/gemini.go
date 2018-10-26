@@ -20,14 +20,17 @@ type Market struct {
 func Init() *Market {
 	m := &Market{
 		streaming: false,
-		pair: []string{
+		pairs: []string{
 			"btcusd",
 			"ethusd",
 			"ethbtc",
-			"bchusd",
-			"bchbtc",
+			// "bchusd",
+			// "bchbtc",
+			// "bcheth",
 			"ltcusd",
 			"ltcbtc",
+			"zecusd",
+			"zecbtc",
 		},
 		data: make(map[string]cq.Quoter),
 	}
@@ -45,12 +48,12 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
 		"Price",
-		"Change",
+		// "Change",
 		"Last Size",
 		"Bid",
 		"Ask",
-		"Low",
-		"High",
+		// "Low",
+		// "High",
 		"Volume",
 	}
 
@@ -63,8 +66,8 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 27; r++ {
-		for c := 0; c <= 8; c++ {
+	for r := 1; r <= 17; r++ {
+		for c := 0; c <= 5; c++ {
 			table.SetCell(r, c, tview.NewTableCell("").
 				SetAlign(tview.AlignRight))
 		}
@@ -94,6 +97,31 @@ func (m *Market) getSnapshot() []error {
 	pairs := m.pairs
 	m.RUnlock()
 	l := len(pairs)
-	// errCh := make(chan error, ())
+	errCh := make(chan error, l*2)
 
+	wg := &sync.WaitGroup{}
+	wg.Add(l * 2)
+	for _, pair := range pairs {
+		m.getTicker(pair, wg, errCh)
+		m.getTrades(pair, wg, errCh)
+	}
+	wg.Wait()
+
+	close(errCh)
+
+	for err := range errCh {
+		e = append(e, err)
+	}
+
+	return e
+}
+
+// Stream connects to websocket connection and starts goroutine to update state of Gemini
+// market with data from websocket messages
+func (m *Market) Stream(data chan cq.Quoter) error {
+	err := connectWS(m, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

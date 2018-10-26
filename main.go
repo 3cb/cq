@@ -6,19 +6,24 @@ import (
 	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
+	"github.com/3cb/cq/gemini"
 	"github.com/3cb/cq/overview"
 	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
 )
 
 func main() {
+	// Initialize exchanges
 	exchanges := make(map[string]cq.Exchange)
 	exchanges["gdax"] = gdax.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
+	exchanges["gemini"] = gemini.Init()
 
+	// Create tables with initial data from http requests
 	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
 	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
+	geminiTbl := exchanges["gemini"].Table(overviewTbl)
 
 	mktView := overviewTbl
 
@@ -39,7 +44,7 @@ func main() {
 			<-done
 		}).
 		AddItem("Gemini", "", '3', func() {
-			view <- overviewTbl
+			view <- geminiTbl
 			<-done
 		}).
 		AddItem("Bitfinex", "", '4', func() {
@@ -61,6 +66,7 @@ func main() {
 		// handle errors here *******************************
 		exchanges["gdax"].Stream(data)
 		exchanges["bitfinex"].Stream(data)
+		exchanges["gemini"].Stream(data)
 		// handle errors here *******************************
 
 		for {
@@ -72,6 +78,8 @@ func main() {
 					t = gdaxTbl
 				case "bitfinex":
 					t = bitfinexTbl
+				case "gemini":
+					t = geminiTbl
 				}
 				app.QueueUpdate(upd.UpdOverviewRow(overviewTbl))
 				app.QueueUpdate(upd.UpdRow(t))
