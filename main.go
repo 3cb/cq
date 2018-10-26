@@ -9,7 +9,6 @@ import (
 	"github.com/3cb/cq/gemini"
 	"github.com/3cb/cq/overview"
 	"github.com/3cb/tview"
-	"github.com/gdamore/tcell"
 )
 
 func main() {
@@ -27,7 +26,7 @@ func main() {
 
 	mktView := overviewTbl
 
-	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
+	// tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
 
 	app := tview.NewApplication()
 
@@ -43,12 +42,12 @@ func main() {
 			view <- gdaxTbl
 			<-done
 		}).
-		AddItem("Gemini", "", '3', func() {
-			view <- geminiTbl
+		AddItem("Bitfinex", "", '3', func() {
+			view <- bitfinexTbl
 			<-done
 		}).
-		AddItem("Bitfinex", "", '4', func() {
-			view <- bitfinexTbl
+		AddItem("Gemini", "", '4', func() {
+			view <- geminiTbl
 			<-done
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
