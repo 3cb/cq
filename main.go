@@ -62,12 +62,6 @@ func main() {
 	data := make(chan cq.Quoter, 500)
 
 	go func() {
-		// handle errors here *******************************
-		exchanges["gdax"].Stream(data)
-		exchanges["bitfinex"].Stream(data)
-		exchanges["gemini"].Stream(data)
-		// handle errors here *******************************
-
 		for {
 			select {
 			case upd := <-data:
@@ -96,6 +90,12 @@ func main() {
 			}
 		}
 	}()
+
+	// handle errors here *******************************
+	exchanges["gdax"].Stream(data)
+	exchanges["bitfinex"].Stream(data)
+	exchanges["gemini"].Stream(data)
+	// handle errors here *******************************
 
 	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
