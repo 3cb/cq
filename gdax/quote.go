@@ -132,9 +132,10 @@ func (quote Quote) ClrBold(table *tview.Table) func() {
 func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
 	return func() {
 		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
 		_, color := cq.FmtDelta(quote.Price, quote.Open)
 
-		table.GetCell(row, 1).
+		table.GetCell(row, col).
 			SetText(cq.FmtPrice(quote.Price)).
 			SetTextColor(color).
 			SetAttributes(tcell.AttrBold)
@@ -145,8 +146,9 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
 func (quote Quote) ClrOverviewBold(table *tview.Table) func() {
 	return func() {
 		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
 
-		table.GetCell(row, 1).
+		table.GetCell(row, col).
 			SetAttributes(tcell.AttrNone)
 	}
 }

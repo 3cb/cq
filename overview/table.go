@@ -96,3 +96,16 @@ func FindRow(quote cq.Quoter) int {
 		return 30
 	}
 }
+
+// FindColumn uses MarketID string to find column in table
+func FindColumn(quote cq.Quoter) int {
+	switch quote.MarketID() {
+	case "gdax":
+		return 1
+	case "bitfinex":
+		return 2
+	// case "gemini":
+	default:
+		return 3
+	}
+}

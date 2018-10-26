@@ -154,6 +154,7 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
 		var color tcell.Color
 
 		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
 		if quote.Change >= 0 {
 			color = tcell.ColorGreen
 		} else {
@@ -162,7 +163,7 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
 
 		price := strconv.FormatFloat(quote.Price, 'f', -1, 64)
 
-		table.GetCell(row, 2).
+		table.GetCell(row, col).
 			SetText(cq.FmtPrice(price)).
 			SetTextColor(color).
 			SetAttributes(tcell.AttrBold)
@@ -173,8 +174,9 @@ func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
 func (quote Quote) ClrOverviewBold(table *tview.Table) func() {
 	return func() {
 		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
 
-		table.GetCell(row, 2).
+		table.GetCell(row, col).
 			SetAttributes(tcell.AttrNone)
 	}
 }
