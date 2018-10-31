@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
@@ -16,7 +17,10 @@ func (m *Market) getTickers(errCh chan<- error, wg *sync.WaitGroup) {
 	api := "https://api.bitfinex.com/v2/tickers?symbols="
 	b := strings.Builder{}
 	b.WriteString(api)
-	for i, pair := range m.pairs {
+	m.Lock()
+	pairs := m.pairs
+	m.Unlock()
+	for i, pair := range pairs {
 		b.WriteString(pair)
 		if i < len(m.pairs)-1 {
 			b.WriteString(",")
@@ -87,7 +91,7 @@ func (m *Market) getTrades(pair string, errCh chan<- error, wg *sync.WaitGroup) 
 	for _, val := range data {
 		q := (m.data[pair]).(Quote)
 		q.Price = (val[3]).(float64)
-		q.Size = (val[2]).(float64)
+		q.Size = math.Abs((val[2]).(float64))
 		m.data[pair] = q
 	}
 	m.Unlock()

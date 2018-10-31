@@ -3,7 +3,7 @@ package gdax
 import (
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/overview"
-	"github.com/3cb/muttview"
+	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
 )
 
@@ -61,84 +61,100 @@ func (quote Quote) FindTblRow() int {
 		return 18
 	case "ETH-EUR":
 		return 20
+	case "ETH-GBP":
+		return 22
 	case "LTC-USD":
-		return 23
-	case "LTC-BTC":
 		return 25
-	// case "LTC-EUR":
-	default:
+	case "LTC-BTC":
 		return 27
+	case "LTC-EUR":
+		return 29
+	case "ZRX-USD":
+		return 32
+	// case "ZRX-BTC":
+	default:
+		return 34
 	}
 }
 
 // UpdRow refreshes table with new data from websocket message
-func (quote Quote) UpdRow(table *tview.Table) {
-	row := quote.FindTblRow()
-	delta, color := cq.FmtDelta(quote.Price, quote.Open)
+func (quote Quote) UpdRow(table *tview.Table) func() {
+	return func() {
+		row := quote.FindTblRow()
+		delta, color := cq.FmtDelta(quote.Price, quote.Open)
 
-	table.GetCell(row, 0).
-		SetText(cq.FmtPair(quote.ID)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 1).
-		SetText(cq.FmtPrice(quote.Price)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 2).
-		SetText(delta).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 3).
-		SetText(cq.FmtSize(quote.Size)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 4).
-		SetText(cq.FmtPrice(quote.Bid)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 5).
-		SetText(cq.FmtPrice(quote.Ask)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 6).
-		SetText(cq.FmtPrice(quote.Low)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 7).
-		SetText(cq.FmtPrice(quote.High)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
-	table.GetCell(row, 8).
-		SetText(cq.FmtVolume(quote.Volume)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 0).
+			SetText(cq.FmtPair(quote.ID)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 1).
+			SetText(cq.FmtPrice(quote.Price)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 2).
+			SetText(delta).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 3).
+			SetText(cq.FmtSize(quote.Size)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 4).
+			SetText(cq.FmtPrice(quote.Bid)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 5).
+			SetText(cq.FmtPrice(quote.Ask)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 6).
+			SetText(cq.FmtPrice(quote.Low)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 7).
+			SetText(cq.FmtPrice(quote.High)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+		table.GetCell(row, 8).
+			SetText(cq.FmtVolume(quote.Volume)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+	}
 }
 
 // ClrBold resets "Price" cell's attributes to remove bold font
-func (quote Quote) ClrBold(table *tview.Table) {
-	row := quote.FindTblRow()
+func (quote Quote) ClrBold(table *tview.Table) func() {
+	return func() {
+		row := quote.FindTblRow()
 
-	for col := 0; col <= 8; col++ {
-		table.GetCell(row, col).
-			SetAttributes(tcell.AttrNone)
+		for col := 0; col <= 8; col++ {
+			table.GetCell(row, col).
+				SetAttributes(tcell.AttrNone)
+		}
 	}
 }
 
 // UpdOverviewRow resets price quote in overview display
-func (quote Quote) UpdOverviewRow(table *tview.Table) {
-	row := overview.FindRow(quote)
-	_, color := cq.FmtDelta(quote.Price, quote.Open)
+func (quote Quote) UpdOverviewRow(table *tview.Table) func() {
+	return func() {
+		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
+		_, color := cq.FmtDelta(quote.Price, quote.Open)
 
-	table.GetCell(row, 1).
-		SetText(cq.FmtPrice(quote.Price)).
-		SetTextColor(color).
-		SetAttributes(tcell.AttrBold)
+		table.GetCell(row, col).
+			SetText(cq.FmtPrice(quote.Price)).
+			SetTextColor(color).
+			SetAttributes(tcell.AttrBold)
+	}
 }
 
 // ClrOverviewBold removes bold font from Price cells in overview display
-func (quote Quote) ClrOverviewBold(table *tview.Table) {
-	row := overview.FindRow(quote)
+func (quote Quote) ClrOverviewBold(table *tview.Table) func() {
+	return func() {
+		row := overview.FindRow(quote)
+		col := overview.FindColumn(quote)
 
-	table.GetCell(row, 1).
-		SetAttributes(tcell.AttrNone)
+		table.GetCell(row, col).
+			SetAttributes(tcell.AttrNone)
+	}
 }

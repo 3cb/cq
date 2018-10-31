@@ -30,10 +30,11 @@ func FmtPrice(price string) string {
 	}
 	if num >= 10 {
 		num = float64(int64(num*100+0.5)) / 100
-		return fmt.Sprintf("%.2f", num)
+		price = fmt.Sprintf("%.2f", num)
+	} else {
+		num = float64(int64(num*100000+0.5)) / 100000
+		price = fmt.Sprintf("%.5f", num)
 	}
-	num = float64(int64(num*100000+0.5)) / 100000
-	price = fmt.Sprintf("%.5f", num)
 	spc := 10 - len(price)
 	b := strings.Builder{}
 	for i := 0; i < spc; i++ {

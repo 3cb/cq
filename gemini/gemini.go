@@ -1,4 +1,4 @@
-package bitfinex
+package gemini
 
 import (
 	"sync"
@@ -16,28 +16,21 @@ type Market struct {
 	data      map[string]cq.Quoter
 }
 
-// Init creates instance of a bitfinex market without quotes
+// Init creates a new instance of gemini market without quotes
 func Init() *Market {
 	m := &Market{
 		streaming: false,
 		pairs: []string{
-			"tBTCUSD",
-			"tBTCEUR",
-			"tBTCGBP",
-			"tBTCJPY",
-			"tBCHUSD",
-			"tBCHBTC",
-			"tETHUSD",
-			"tETHBTC",
-			"tETHEUR",
-			"tETHGBP",
-			"tETHJPY",
-			"tLTCUSD",
-			"tLTCBTC",
-			"tZECUSD",
-			"tZECBTC",
-			"tZRXUSD",
-			"tZRXBTC",
+			"btcusd",
+			"ethusd",
+			"ethbtc",
+			// "bchusd",
+			// "bchbtc",
+			// "bcheth",
+			"ltcusd",
+			"ltcbtc",
+			"zecusd",
+			"zecbtc",
 		},
 		data: make(map[string]cq.Quoter),
 	}
@@ -49,32 +42,33 @@ func Init() *Market {
 	return m
 }
 
-// Table returns an instance of tview.Table formatted for bitfinex ready for data
+// Table method uses market data to create and return an
+// instance of tview.Table to caller application
 func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
 		"Price",
-		"Change",
+		// "Change",
 		"Last Size",
 		"Bid",
 		"Ask",
-		"Low",
-		"High",
+		// "Low",
+		// "High",
 		"Volume",
 	}
 
-	tbl := tview.NewTable().
+	table := tview.NewTable().
 		SetBorders(false)
 
 	for i, header := range headers {
-		tbl.SetCell(0, i, tview.NewTableCell(header).
+		table.SetCell(0, i, tview.NewTableCell(header).
 			SetTextColor(tcell.ColorYellow).
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 39; r++ {
-		for c := 0; c <= 8; c++ {
-			tbl.SetCell(r, c, tview.NewTableCell("").
+	for r := 1; r <= 17; r++ {
+		for c := 0; c <= 5; c++ {
+			table.SetCell(r, c, tview.NewTableCell("").
 				SetAlign(tview.AlignRight))
 		}
 	}
@@ -87,16 +81,15 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(tbl)()
-		quote.ClrBold(tbl)()
+		quote.UpdRow(table)()
+		quote.ClrBold(table)()
 		quote.UpdOverviewRow(overviewTbl)()
 		quote.ClrOverviewBold(overviewTbl)()
 	}
 
-	return tbl
+	return table
 }
 
-// getSnapshot performs http requests to the Bitfinex API to get initial market data
 func (m *Market) getSnapshot() []error {
 	var e []error
 
@@ -104,25 +97,27 @@ func (m *Market) getSnapshot() []error {
 	pairs := m.pairs
 	m.RUnlock()
 	l := len(pairs)
-	errCh := make(chan error, l)
+	errCh := make(chan error, l*2)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(l + 1)
-	go m.getTickers(errCh, wg)
+	wg.Add(l * 2)
 	for _, pair := range pairs {
-		go m.getTrades(pair, errCh, wg)
+		m.getTicker(pair, wg, errCh)
+		m.getTrades(pair, wg, errCh)
 	}
 	wg.Wait()
 
 	close(errCh)
+
 	for err := range errCh {
 		e = append(e, err)
 	}
+
 	return e
 }
 
-// Stream connects to Bitfinex websocket API and sends messages to data channel
-// to update market and overview tables
+// Stream connects to websocket connection and starts goroutine to update state of Gemini
+// market with data from websocket messages
 func (m *Market) Stream(data chan cq.Quoter) error {
 	err := connectWS(m, data)
 	if err != nil {

@@ -1,6 +1,7 @@
-package bitfinex
+package hitbtc
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/3cb/cq/cq"
@@ -12,7 +13,7 @@ import (
 type Market struct {
 	sync.RWMutex
 	streaming bool
-	pairs     []string
+	symbols   []string
 	data      map[string]cq.Quoter
 }
 
@@ -20,36 +21,48 @@ type Market struct {
 func Init() *Market {
 	m := &Market{
 		streaming: false,
-		pairs: []string{
-			"tBTCUSD",
-			"tBTCEUR",
-			"tBTCGBP",
-			"tBTCJPY",
-			"tBCHUSD",
-			"tBCHBTC",
-			"tETHUSD",
-			"tETHBTC",
-			"tETHEUR",
-			"tETHGBP",
-			"tETHJPY",
-			"tLTCUSD",
-			"tLTCBTC",
-			"tZECUSD",
-			"tZECBTC",
-			"tZRXUSD",
-			"tZRXBTC",
+		symbols: []string{
+			"BTCUSD",
+			"BCHUSD",
+			"ETHUSD",
+			"ETHBTC",
+			"LTCUSD",
+			"LTCBTC",
+			"ZECUSD",
+			"ZECBTC",
+			"ZRXUSD",
+			"ZRXBTC",
 		},
 		data: make(map[string]cq.Quoter),
 	}
 
-	for _, pair := range m.pairs {
-		m.data[pair] = Quote{}
+	for _, s := range m.symbols {
+		m.data[s] = Quote{
+			Symbol: s,
+			ID:     formatID(s),
+		}
 	}
 
 	return m
 }
 
-// Table returns an instance of tview.Table formatted for bitfinex ready for data
+// formats pair with uppercase letters separated by "/"
+func formatID(s string) string {
+	temp := strings.Split(s, "")
+	b := strings.Builder{}
+
+	for i := 0; i < 3; i++ {
+		b.WriteString(temp[i])
+	}
+	b.WriteString("-")
+	for i := 3; i < len(temp); i++ {
+		b.WriteString(temp[i])
+	}
+
+	return b.String()
+}
+
+// Table returns an instance of tview.Table formatted for hitbtc ready for data
 func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
 		"Pair",
@@ -72,7 +85,7 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 39; r++ {
+	for r := 1; r <= 25; r++ {
 		for c := 0; c <= 8; c++ {
 			tbl.SetCell(r, c, tview.NewTableCell("").
 				SetAlign(tview.AlignRight))
@@ -96,37 +109,13 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	return tbl
 }
 
-// getSnapshot performs http requests to the Bitfinex API to get initial market data
-func (m *Market) getSnapshot() []error {
-	var e []error
-
-	m.RLock()
-	pairs := m.pairs
-	m.RUnlock()
-	l := len(pairs)
-	errCh := make(chan error, l)
-
-	wg := &sync.WaitGroup{}
-	wg.Add(l + 1)
-	go m.getTickers(errCh, wg)
-	for _, pair := range pairs {
-		go m.getTrades(pair, errCh, wg)
-	}
-	wg.Wait()
-
-	close(errCh)
-	for err := range errCh {
-		e = append(e, err)
-	}
-	return e
-}
-
-// Stream connects to Bitfinex websocket API and sends messages to data channel
-// to update market and overview tables
+// Stream connects to websocket server and streams price quotes
 func (m *Market) Stream(data chan cq.Quoter) error {
-	err := connectWS(m, data)
-	if err != nil {
-		return err
-	}
+	// var e error
+
+	// if err := connectWS(m, data); err != nil {
+	// 	return err
+	// }
+
 	return nil
 }

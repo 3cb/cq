@@ -6,20 +6,28 @@ import (
 	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
+	"github.com/3cb/cq/gemini"
+	"github.com/3cb/cq/hitbtc"
 	"github.com/3cb/cq/overview"
-	"github.com/3cb/muttview"
+	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
 )
 
 func main() {
+	// Initialize exchanges
 	exchanges := make(map[string]cq.Exchange)
 	exchanges["gdax"] = gdax.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
+	exchanges["hitbtc"] = hitbtc.Init()
+	exchanges["gemini"] = gemini.Init()
 
+	// Create tables with initial data from http requests
+	println("Building tables...")
 	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
 	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
-
+	hitbtcTbl := exchanges["hitbtc"].Table(overviewTbl)
+	geminiTbl := exchanges["gemini"].Table(overviewTbl)
 	mktView := overviewTbl
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
@@ -38,12 +46,16 @@ func main() {
 			view <- gdaxTbl
 			<-done
 		}).
-		AddItem("Gemini", "", '3', func() {
-			view <- overviewTbl
+		AddItem("Bitfinex", "", '3', func() {
+			view <- bitfinexTbl
 			<-done
 		}).
-		AddItem("Bitfinex", "", '4', func() {
-			view <- bitfinexTbl
+		AddItem("BitBTC", "", '4', func() {
+			view <- hitbtcTbl
+			<-done
+		}).
+		AddItem("Gemini", "", '5', func() {
+			view <- geminiTbl
 			<-done
 		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
@@ -58,11 +70,6 @@ func main() {
 	data := make(chan cq.Quoter, 500)
 
 	go func() {
-		// handle errors here *******************************
-		exchanges["gdax"].Stream(data)
-		exchanges["bitfinex"].Stream(data)
-		// handle errors here *******************************
-
 		for {
 			select {
 			case upd := <-data:
@@ -72,26 +79,36 @@ func main() {
 					t = gdaxTbl
 				case "bitfinex":
 					t = bitfinexTbl
+				case "hitbtc":
+					t = hitbtcTbl
+				case "gemini":
+					t = geminiTbl
 				}
-				upd.UpdOverviewRow(overviewTbl)
-				upd.UpdRow(t)
-				app.Draw()
+				app.QueueUpdate(upd.UpdOverviewRow(overviewTbl))
+				app.QueueUpdate(upd.UpdRow(t))
 
 				time.Sleep(85 * time.Millisecond)
-				upd.ClrOverviewBold(overviewTbl)
-				upd.ClrBold(t)
-				app.Draw()
+				app.QueueUpdate(upd.ClrOverviewBold(overviewTbl))
+				app.QueueUpdate(upd.ClrBold(t))
 			case tbl := <-view:
 				if mktView != tbl {
 					body.RemoveItem(mktView)
 					body.AddItem(tbl, 0, 1, false)
+					mktView = tbl
 				}
-				mktView = tbl
 				done <- struct{}{}
 			}
 		}
 	}()
 
+	println("Connecting to exchanges...")
+	// handle errors here *******************************
+	exchanges["gdax"].Stream(data)
+	exchanges["bitfinex"].Stream(data)
+	exchanges["gemini"].Stream(data)
+	// handle errors here *******************************
+
+	println("Launching app...")
 	if err := app.SetRoot(body, true).Run(); err != nil {
 		panic(err)
 	}

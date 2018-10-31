@@ -1,7 +1,7 @@
 package cq
 
 import (
-	"github.com/3cb/muttview"
+	"github.com/3cb/tview"
 )
 
 // Quoter is an interface that market quotes implement to initialize
@@ -12,10 +12,10 @@ type Quoter interface {
 
 	// UpdRow updates exchange table row with new quote data and changes
 	// font to bold to signal change in data
-	UpdRow(*tview.Table)
+	UpdRow(*tview.Table) func()
 	// ClrBold changes font of table row back to normal
-	ClrBold(*tview.Table)
+	ClrBold(*tview.Table) func()
 
-	UpdOverviewRow(*tview.Table)
-	ClrOverviewBold(*tview.Table)
+	UpdOverviewRow(*tview.Table) func()
+	ClrOverviewBold(*tview.Table) func()
 }

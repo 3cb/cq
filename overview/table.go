@@ -2,7 +2,7 @@ package overview
 
 import (
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/muttview"
+	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
 )
 
@@ -24,6 +24,10 @@ func Table() *tview.Table {
 		"LTC/USD",
 		"LTC/BTC",
 		"LTC/EUR",
+		"ZEC/USD",
+		"ZEC/BTC",
+		"ZRX/USD",
+		"ZRX/BTC",
 	}
 
 	table := tview.NewTable().
@@ -37,7 +41,11 @@ func Table() *tview.Table {
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 3, tview.NewTableCell("            Gemini").
+	table.SetCell(0, 3, tview.NewTableCell("            HitBTC").
+		SetTextColor(tcell.ColorYellow).
+		SetAlign(tview.AlignRight))
+
+	table.SetCell(0, 4, tview.NewTableCell("            Gemini").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
@@ -54,6 +62,9 @@ func Table() *tview.Table {
 			SetAlign(tview.AlignRight))
 
 		table.SetCell(row, 3, tview.NewTableCell("").
+			SetAlign(tview.AlignRight))
+
+		table.SetCell(row, 4, tview.NewTableCell("").
 			SetAlign(tview.AlignRight))
 	}
 
@@ -91,8 +102,31 @@ func FindRow(quote cq.Quoter) int {
 		return 26
 	case "LTC-BTC":
 		return 28
-	// case "LTC-EUR":
-	default:
+	case "LTC-EUR":
 		return 30
+	case "ZEC-USD":
+		return 32
+	case "ZEC-BTC":
+		return 34
+	case "ZRX-USD":
+		return 36
+	// case "ZRX-BTC":
+	default:
+		return 38
+	}
+}
+
+// FindColumn uses MarketID string to find column in table
+func FindColumn(quote cq.Quoter) int {
+	switch quote.MarketID() {
+	case "gdax":
+		return 1
+	case "bitfinex":
+		return 2
+	case "hitbtc":
+		return 3
+	// case "gemini":
+	default:
+		return 4
 	}
 }
