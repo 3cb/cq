@@ -7,6 +7,7 @@ import (
 	"github.com/3cb/cq/cq"
 	"github.com/3cb/cq/gdax"
 	"github.com/3cb/cq/gemini"
+	"github.com/3cb/cq/hitbtc"
 	"github.com/3cb/cq/overview"
 	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
@@ -17,6 +18,7 @@ func main() {
 	exchanges := make(map[string]cq.Exchange)
 	exchanges["gdax"] = gdax.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
+	exchanges["hitbtc"] = hitbtc.Init()
 	exchanges["gemini"] = gemini.Init()
 
 	// Create tables with initial data from http requests
@@ -24,8 +26,8 @@ func main() {
 	overviewTbl := overview.Table()
 	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
 	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
+	hitbtcTbl := exchanges["hitbtc"].Table(overviewTbl)
 	geminiTbl := exchanges["gemini"].Table(overviewTbl)
-
 	mktView := overviewTbl
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
@@ -48,7 +50,11 @@ func main() {
 			view <- bitfinexTbl
 			<-done
 		}).
-		AddItem("Gemini", "", '4', func() {
+		AddItem("BitBTC", "", '4', func() {
+			view <- hitbtcTbl
+			<-done
+		}).
+		AddItem("Gemini", "", '5', func() {
 			view <- geminiTbl
 			<-done
 		}).
@@ -73,6 +79,8 @@ func main() {
 					t = gdaxTbl
 				case "bitfinex":
 					t = bitfinexTbl
+				case "hitbtc":
+					t = hitbtcTbl
 				case "gemini":
 					t = geminiTbl
 				}

@@ -41,7 +41,11 @@ func Table() *tview.Table {
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 3, tview.NewTableCell("            Gemini").
+	table.SetCell(0, 3, tview.NewTableCell("            HitBTC").
+		SetTextColor(tcell.ColorYellow).
+		SetAlign(tview.AlignRight))
+
+	table.SetCell(0, 4, tview.NewTableCell("            Gemini").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
@@ -58,6 +62,9 @@ func Table() *tview.Table {
 			SetAlign(tview.AlignRight))
 
 		table.SetCell(row, 3, tview.NewTableCell("").
+			SetAlign(tview.AlignRight))
+
+		table.SetCell(row, 4, tview.NewTableCell("").
 			SetAlign(tview.AlignRight))
 	}
 
@@ -116,8 +123,10 @@ func FindColumn(quote cq.Quoter) int {
 		return 1
 	case "bitfinex":
 		return 2
+	case "hitbtc":
+		return 3
 	// case "gemini":
 	default:
-		return 3
+		return 4
 	}
 }
