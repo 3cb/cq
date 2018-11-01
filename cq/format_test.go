@@ -6,23 +6,6 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-func Test_FmtPair(t *testing.T) {
-	tc := []struct {
-		input    string
-		expected string
-	}{
-		{"BTC-USD", "BTC/USD"},
-		{"ETH-EUR", "ETH/EUR"},
-	}
-
-	for _, c := range tc {
-		actual := FmtPair(c.input)
-		if actual != c.expected {
-			t.Errorf("expected %v; got %v", c.expected, actual)
-		}
-	}
-}
-
 func Test_FmtPrice(t *testing.T) {
 	tc := []struct {
 		input    string

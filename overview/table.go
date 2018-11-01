@@ -74,43 +74,43 @@ func Table() *tview.Table {
 // FindRow uses pair string to find row in table
 func FindRow(quote cq.Quoter) int {
 	switch quote.PairID() {
-	case "BTC-USD":
+	case "BTC/USD":
 		return 2
-	case "BTC-EUR":
+	case "BTC/EUR":
 		return 4
-	case "BTC-GBP":
+	case "BTC/GBP":
 		return 6
-	case "BTC-JPY":
+	case "BTC/JPY":
 		return 8
-	case "BCH-USD":
+	case "BCH/USD":
 		return 10
-	case "BCH-BTC":
+	case "BCH/BTC":
 		return 12
-	case "BCH-EUR":
+	case "BCH/EUR":
 		return 14
-	case "ETH-USD":
+	case "ETH/USD":
 		return 16
-	case "ETH-BTC":
+	case "ETH/BTC":
 		return 18
-	case "ETH-EUR":
+	case "ETH/EUR":
 		return 20
-	case "ETH-GBP":
+	case "ETH/GBP":
 		return 22
-	case "ETH-JPY":
+	case "ETH/JPY":
 		return 24
-	case "LTC-USD":
+	case "LTC/USD":
 		return 26
-	case "LTC-BTC":
+	case "LTC/BTC":
 		return 28
-	case "LTC-EUR":
+	case "LTC/EUR":
 		return 30
-	case "ZEC-USD":
+	case "ZEC/USD":
 		return 32
-	case "ZEC-BTC":
+	case "ZEC/BTC":
 		return 34
-	case "ZRX-USD":
+	case "ZRX/USD":
 		return 36
-	// case "ZRX-BTC":
+	// case "ZRX/BTC":
 	default:
 		return 38
 	}

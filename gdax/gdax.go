@@ -1,6 +1,7 @@
 package gdax
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/3cb/cq/cq"
@@ -41,7 +42,9 @@ func Init() *Market {
 	}
 
 	for _, pair := range m.pairs {
-		m.data[pair] = Quote{}
+		m.data[pair] = Quote{
+			ID: fmtID(pair),
+		}
 	}
 
 	return m
@@ -131,4 +134,9 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 		return err
 	}
 	return nil
+}
+
+// fmtID formats product id to represent currency pair (i.e., "BTC/USD")
+func fmtID(id string) string {
+	return strings.Join(strings.Split(id, "-"), "/")
 }

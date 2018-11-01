@@ -1,22 +1,20 @@
-package hitbtc
+package gdax
 
-import (
-	"testing"
-)
+import "testing"
 
 func Test_fmtID(t *testing.T) {
 	tc := []struct {
 		input    string
 		expected string
 	}{
-		{"BTCUSD", "BTC/USD"},
-		{"BCHUSD", "BCH/USD"},
+		{"BTC-USD", "BTC/USD"},
+		{"ETH-EUR", "ETH/EUR"},
 	}
 
 	for _, c := range tc {
-		if actual := fmtID(c.input); actual != c.expected {
+		actual := fmtID(c.input)
+		if actual != c.expected {
 			t.Errorf("expected %v; got %v", c.expected, actual)
 		}
-
 	}
 }

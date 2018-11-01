@@ -37,23 +37,23 @@ func (q Quote) PairID() string {
 // returns appropriate row as int
 func (q Quote) findTblRow() int {
 	switch q.ID {
-	case "BTC-USD":
+	case "BTC/USD":
 		return 2
-	case "BCH-USD":
+	case "BCH/USD":
 		return 5
-	case "ETH-USD":
+	case "ETH/USD":
 		return 8
-	case "ETH-BTC":
+	case "ETH/BTC":
 		return 10
-	case "LTC-USD":
+	case "LTC/USD":
 		return 13
-	case "LTC-BTC":
+	case "LTC/BTC":
 		return 15
-	case "ZEC-USD":
+	case "ZEC/USD":
 		return 18
-	case "ZEC-BTC":
+	case "ZEC/BTC":
 		return 20
-	case "ZRX-USD":
+	case "ZRX/USD":
 		return 23
 	// case "ZRX/BTC":
 	default:
@@ -68,7 +68,7 @@ func (q Quote) UpdRow(table *tview.Table) func() {
 		delta, color := cq.FmtDelta(q.Price, q.Open)
 
 		table.GetCell(row, 0).
-			SetText(cq.FmtPair(q.ID)).
+			SetText(q.ID).
 			SetTextColor(color).
 			SetAttributes(tcell.AttrBold)
 		table.GetCell(row, 1).

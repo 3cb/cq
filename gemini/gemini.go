@@ -1,6 +1,7 @@
 package gemini
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/3cb/cq/cq"
@@ -36,7 +37,10 @@ func Init() *Market {
 	}
 
 	for _, pair := range m.pairs {
-		m.data[pair] = Quote{}
+		m.data[pair] = Quote{
+			Symbol: pair,
+			ID:     fmtID(pair),
+		}
 	}
 
 	return m
@@ -124,4 +128,10 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 		return err
 	}
 	return nil
+}
+
+func fmtID(pair string) string {
+	temp := strings.Split(pair, "")
+	temp2 := []string{temp[0], temp[1], temp[2], "/", temp[3], temp[4], temp[5]}
+	return strings.ToUpper(strings.Join(temp2, ""))
 }

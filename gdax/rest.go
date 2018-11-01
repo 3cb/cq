@@ -39,7 +39,6 @@ func getTicker(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	m.Lock()
 	q := (m.data[pair]).(Quote)
-	q.ID = pair
 	q.Bid = ticker.Bid
 	q.Ask = ticker.Ask
 	m.data[pair] = q
@@ -80,7 +79,6 @@ func getStats(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	m.Lock()
 	q := (m.data[pair]).(Quote)
-	q.ID = pair
 	q.High = stats.High
 	q.Low = stats.Low
 	q.Open = stats.Open
@@ -116,7 +114,6 @@ func getTrades(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	m.Lock()
 	q := (m.data[pair]).(Quote)
-	q.ID = pair
 	q.Price = slice[0].Price
 	q.Size = slice[0].Size
 	m.data[pair] = q

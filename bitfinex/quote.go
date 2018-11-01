@@ -42,41 +42,41 @@ func (quote Quote) PairID() string {
 
 // FindTblRow uses the pair ID to determine the quote's table row
 // Returns an int
-func (quote Quote) FindTblRow() int {
+func (quote Quote) findTblRow() int {
 	switch quote.ID {
-	case "BTC-USD":
+	case "BTC/USD":
 		return 2
-	case "BTC-EUR":
+	case "BTC/EUR":
 		return 4
-	case "BTC-GBP":
+	case "BTC/GBP":
 		return 6
-	case "BTC-JPY":
+	case "BTC/JPY":
 		return 8
-	case "BCH-USD":
+	case "BCH/USD":
 		return 11
-	case "BCH-BTC":
+	case "BCH/BTC":
 		return 13
-	case "ETH-USD":
+	case "ETH/USD":
 		return 16
-	case "ETH-BTC":
+	case "ETH/BTC":
 		return 18
-	case "ETH-EUR":
+	case "ETH/EUR":
 		return 20
-	case "ETH-GBP":
+	case "ETH/GBP":
 		return 22
-	case "ETH-JPY":
+	case "ETH/JPY":
 		return 24
-	case "LTC-USD":
+	case "LTC/USD":
 		return 27
-	case "LTC-BTC":
+	case "LTC/BTC":
 		return 29
-	case "ZEC-USD":
+	case "ZEC/USD":
 		return 32
-	case "ZEC-BTC":
+	case "ZEC/BTC":
 		return 34
-	case "ZRX-USD":
+	case "ZRX/USD":
 		return 37
-	// case "ZRX-BTC":
+	// case "ZRX/BTC":
 	default:
 		return 39
 	}
@@ -94,7 +94,7 @@ func (quote Quote) UpdRow(table *tview.Table) func() {
 		}
 		price := strconv.FormatFloat(quote.Price, 'f', -1, 64)
 
-		delta := formatDelta(quote.ChangePerc)
+		delta := fmtDelta(quote.ChangePerc)
 
 		size := strconv.FormatFloat(quote.Size, 'f', -1, 64)
 		bid := strconv.FormatFloat(quote.Bid, 'f', -1, 64)
@@ -103,10 +103,10 @@ func (quote Quote) UpdRow(table *tview.Table) func() {
 		high := strconv.FormatFloat(quote.High, 'f', -1, 64)
 		vol := strconv.FormatFloat(quote.Volume, 'f', -1, 64)
 
-		row := quote.FindTblRow()
+		row := quote.findTblRow()
 
 		table.GetCell(row, 0).
-			SetText(cq.FmtPair(quote.ID)).
+			SetText(quote.ID).
 			SetTextColor(color).
 			SetAttributes(tcell.AttrBold)
 		table.GetCell(row, 1).
@@ -147,7 +147,7 @@ func (quote Quote) UpdRow(table *tview.Table) func() {
 // ClrBold resets "Price" cell's attributes to remove bold font
 func (quote Quote) ClrBold(table *tview.Table) func() {
 	return func() {
-		row := quote.FindTblRow()
+		row := quote.findTblRow()
 
 		for col := 0; col <= 8; col++ {
 			table.GetCell(row, col).
@@ -189,7 +189,7 @@ func (quote Quote) ClrOverviewBold(table *tview.Table) func() {
 	}
 }
 
-func formatDelta(change float64) string {
+func fmtDelta(change float64) string {
 	change *= 100
 	delta := strconv.FormatFloat(change, 'f', 2, 64)
 	spc := 9 - len(delta) - 1 // extra "1" acounts for "%" character

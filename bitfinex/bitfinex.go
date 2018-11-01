@@ -1,6 +1,7 @@
 package bitfinex
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/3cb/cq/cq"
@@ -43,7 +44,10 @@ func Init() *Market {
 	}
 
 	for _, pair := range m.pairs {
-		m.data[pair] = Quote{}
+		m.data[pair] = Quote{
+			Symbol: pair,
+			ID:     fmtID(pair),
+		}
 	}
 
 	return m
@@ -129,4 +133,17 @@ func (m *Market) Stream(data chan cq.Quoter) error {
 		return err
 	}
 	return nil
+}
+
+func fmtID(symbol string) string {
+	s1 := strings.Split(symbol, "")
+	b := strings.Builder{}
+	for i := 1; i < 4; i++ {
+		b.WriteString(s1[i])
+	}
+	b.WriteString("/")
+	for i := 4; i < 7; i++ {
+		b.WriteString(s1[i])
+	}
+	return b.String()
 }

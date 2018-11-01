@@ -54,19 +54,11 @@ func (m *Market) getTicker(pair string, wg *sync.WaitGroup, errCh chan<- error) 
 
 	m.Lock()
 	q := (m.data[pair]).(Quote)
-	q.Symbol = pair
-	q.ID = setID(pair)
 	q.Bid = data.Bid
 	q.Ask = data.Ask
 	q.Volume = (data.Volume[getVolDenom(pair)]).(string)
 	m.data[pair] = q
 	m.Unlock()
-}
-
-func setID(pair string) string {
-	temp := strings.Split(pair, "")
-	temp2 := []string{temp[0], temp[1], temp[2], "-", temp[3], temp[4], temp[5]}
-	return strings.ToUpper(strings.Join(temp2, ""))
 }
 
 // getVolDenom takes the trading pair as a parameter and returns the denomination

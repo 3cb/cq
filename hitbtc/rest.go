@@ -90,7 +90,6 @@ func getTicker(m *Market, wg *sync.WaitGroup, errCh chan<- error) {
 			if s == d.Symbol {
 				m.Lock()
 				q := (m.data[s]).(Quote)
-				q.Symbol = s
 				q.Ask = d.Ask
 				q.Bid = d.Bid
 				q.Low = d.Low

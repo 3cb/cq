@@ -50,8 +50,6 @@ func (m *Market) getTickers(errCh chan<- error, wg *sync.WaitGroup) {
 	for _, v := range data {
 		symbol := (v[0]).(string)
 		q := m.data[symbol].(Quote)
-		q.Symbol = symbol
-		q.ID = formatID(symbol)
 		q.Bid = (v[1]).(float64)
 		q.Ask = (v[3]).(float64)
 		q.Change = (v[5]).(float64)
@@ -95,17 +93,4 @@ func (m *Market) getTrades(pair string, errCh chan<- error, wg *sync.WaitGroup) 
 		m.data[pair] = q
 	}
 	m.Unlock()
-}
-
-func formatID(symbol string) string {
-	s1 := strings.Split(symbol, "")
-	b := strings.Builder{}
-	for i := 1; i < 4; i++ {
-		b.WriteString(s1[i])
-	}
-	b.WriteString("-")
-	for i := 4; i < 7; i++ {
-		b.WriteString(s1[i])
-	}
-	return b.String()
 }

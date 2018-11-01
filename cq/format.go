@@ -8,17 +8,12 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-// All formatting functions except 'FmtPair' pad the front of strings with empty spaces
+// All formatting functions pad the front of strings with empty spaces
 // to maintain column width.  Fixed column widths are set according to value type:
 // Price: 10
 // Delta: 9
 // Size: 13
 // Volume: 9
-
-// FmtPair formats product id to represent currency pair (i.e., "BTC/USD")
-func FmtPair(id string) string {
-	return strings.Join(strings.Split(id, "-"), "/")
-}
 
 // FmtPrice formats price data for display
 // If price is >= 10 it uses 2 decimal places

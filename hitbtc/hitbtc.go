@@ -39,7 +39,7 @@ func Init() *Market {
 	for _, s := range m.symbols {
 		m.data[s] = Quote{
 			Symbol: s,
-			ID:     formatID(s),
+			ID:     fmtID(s),
 		}
 	}
 
@@ -103,14 +103,14 @@ func (m *Market) Stream(dataCh chan cq.Quoter) error {
 }
 
 // formats pair with uppercase letters separated by "/"
-func formatID(s string) string {
+func fmtID(s string) string {
 	temp := strings.Split(s, "")
 	b := strings.Builder{}
 
 	for i := 0; i < 3; i++ {
 		b.WriteString(temp[i])
 	}
-	b.WriteString("-")
+	b.WriteString("/")
 	for i := 3; i < len(temp); i++ {
 		b.WriteString(temp[i])
 	}

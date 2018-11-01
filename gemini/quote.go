@@ -33,19 +33,19 @@ func (quote Quote) PairID() string {
 // Returns an int
 func (quote Quote) findTblRow() int {
 	switch quote.ID {
-	case "BTC-USD":
+	case "BTC/USD":
 		return 2
-	case "ETH-USD":
+	case "ETH/USD":
 		return 5
-	case "ETH-BTC":
+	case "ETH/BTC":
 		return 7
-	case "LTC-USD":
+	case "LTC/USD":
 		return 10
-	case "LTC-BTC":
+	case "LTC/BTC":
 		return 12
-	case "ZEC-USD":
+	case "ZEC/USD":
 		return 15
-	// case "ZEC-BTC":
+	// case "ZEC/BTC":
 	default:
 		return 17
 	}
@@ -58,7 +58,7 @@ func (quote Quote) UpdRow(table *tview.Table) func() {
 		// delta, color := cq.FmtDelta(quote.Price, quote.Open)
 
 		table.GetCell(row, 0).
-			SetText(cq.FmtPair(quote.ID)).
+			SetText(quote.ID).
 			// SetTextColor(color).
 			SetAttributes(tcell.AttrBold)
 		table.GetCell(row, 1).

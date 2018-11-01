@@ -20,17 +20,17 @@ func Test_getVolDenom(t *testing.T) {
 	}
 }
 
-func Test_setID(t *testing.T) {
+func Test_fmtID(t *testing.T) {
 	tc := []struct {
 		input    string
 		expected string
 	}{
-		{"btcusd", "BTC-USD"},
-		{"ethusd", "ETH-USD"},
+		{"btcusd", "BTC/USD"},
+		{"ethusd", "ETH/USD"},
 	}
 
 	for _, c := range tc {
-		actual := setID(c.input)
+		actual := fmtID(c.input)
 		if actual != c.expected {
 			t.Errorf("expected %v; got %v", c.expected, actual)
 		}
