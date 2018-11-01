@@ -2,7 +2,6 @@ package hitbtc
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -50,12 +49,6 @@ func (m *Market) getSnapshot() []error {
 		go getTrades(m, s, wg, errCh)
 	}
 	wg.Wait()
-
-	for _, d := range m.data {
-		m.Lock()
-		fmt.Printf("%v", d)
-		m.Unlock()
-	}
 
 	close(errCh)
 	for err := range errCh {
@@ -145,5 +138,4 @@ func getTrades(m *Market, symbol string, wg *sync.WaitGroup, errCh chan<- error)
 	q.Size = data[0].Quantity
 	m.data[symbol] = q
 	m.Unlock()
-
 }

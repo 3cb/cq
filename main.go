@@ -105,6 +105,7 @@ func main() {
 	// handle errors here *******************************
 	exchanges["gdax"].Stream(data)
 	exchanges["bitfinex"].Stream(data)
+	exchanges["hitbtc"].Stream(data)
 	exchanges["gemini"].Stream(data)
 	// handle errors here *******************************
 

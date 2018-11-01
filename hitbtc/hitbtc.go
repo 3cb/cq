@@ -46,22 +46,6 @@ func Init() *Market {
 	return m
 }
 
-// formats pair with uppercase letters separated by "/"
-func formatID(s string) string {
-	temp := strings.Split(s, "")
-	b := strings.Builder{}
-
-	for i := 0; i < 3; i++ {
-		b.WriteString(temp[i])
-	}
-	b.WriteString("-")
-	for i := 3; i < len(temp); i++ {
-		b.WriteString(temp[i])
-	}
-
-	return b.String()
-}
-
 // Table returns an instance of tview.Table formatted for hitbtc ready for data
 func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	headers := []string{
@@ -110,12 +94,26 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 }
 
 // Stream connects to websocket server and streams price quotes
-func (m *Market) Stream(data chan cq.Quoter) error {
-	// var e error
-
-	// if err := connectWS(m, data); err != nil {
-	// 	return err
-	// }
+func (m *Market) Stream(dataCh chan cq.Quoter) error {
+	if err := connectWS(m, dataCh); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+// formats pair with uppercase letters separated by "/"
+func formatID(s string) string {
+	temp := strings.Split(s, "")
+	b := strings.Builder{}
+
+	for i := 0; i < 3; i++ {
+		b.WriteString(temp[i])
+	}
+	b.WriteString("-")
+	for i := 3; i < len(temp); i++ {
+		b.WriteString(temp[i])
+	}
+
+	return b.String()
 }
