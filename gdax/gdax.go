@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 // Market conatins state data

@@ -1,6 +1,6 @@
 package cq
 
-import "github.com/3cb/tview"
+import "github.com/rivo/tview"
 
 // Exchange interface allows caller to get http snapshot price quotes,
 // stream live data via websocket, create tables for display in gui

@@ -2,8 +2,8 @@ package overview
 
 import (
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 // Table creates table comparing prices from different crypto exchanges

@@ -1,7 +1,7 @@
 package cq
 
 import (
-	"github.com/3cb/tview"
+	"github.com/rivo/tview"
 )
 
 // Quoter is an interface that market quotes implement to initialize
