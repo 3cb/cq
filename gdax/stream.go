@@ -43,8 +43,8 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 				quote.Price = msg.Price
 				quote.Size = msg.Size
 				m.data[msg.ID] = quote
-				data <- quote
 				m.Unlock()
+				data <- quote
 			} else if msg.Type == "ticker" {
 				m.Lock()
 				quote := (m.data[msg.ID]).(Quote)
@@ -55,8 +55,8 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 				quote.Open = msg.Open
 				quote.Volume = msg.Volume
 				m.data[msg.ID] = quote
-				data <- quote
 				m.Unlock()
+				data <- quote
 			}
 			msg = Quote{}
 		}

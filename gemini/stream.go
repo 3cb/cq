@@ -81,8 +81,8 @@ func connectWS(m *Market, data chan<- cq.Quoter) error {
 					q := (m.data[pair]).(Quote)
 					updateBidAsk(&q, msg.Events[0])
 					m.data[pair] = q
-					data <- q
 					m.Unlock()
+					data <- q
 				case 2:
 					if t := (msg.Events[0]["type"]).(string); t == "trade" {
 						m.Lock()
@@ -90,13 +90,12 @@ func connectWS(m *Market, data chan<- cq.Quoter) error {
 						updatePriceSizeVol(&q, msg.Events[0])
 						updateBidAsk(&q, msg.Events[1])
 						m.data[pair] = q
-						data <- q
 						m.Unlock()
+						data <- q
 					}
 				default:
 					continue
 				}
-
 			}
 		}
 	}()

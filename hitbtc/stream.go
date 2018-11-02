@@ -137,8 +137,8 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 				q.Open = (p["open"]).(string)
 				q.Volume = (p["volume"]).(string)
 				m.data[s] = q
-				dataCh <- q
 				m.Unlock()
+				dataCh <- q
 			case "updateTrades":
 				p := (msg.Params).(map[string]interface{})
 				d := (p["data"]).([]interface{})
@@ -150,8 +150,8 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 				q.Price = (u["price"]).(string)
 				q.Size = (u["quantity"]).(string)
 				m.data[s] = q
-				dataCh <- q
 				m.Unlock()
+				dataCh <- q
 			default:
 				continue
 			}

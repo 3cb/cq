@@ -138,8 +138,8 @@ func tickerToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Q
 	q.High = (upd[8]).(float64)
 	q.Low = (upd[9]).(float64)
 	m.data[pair] = q
-	dataCh <- q
 	m.Unlock()
+	dataCh <- q
 }
 
 func tradeToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Quoter) {
@@ -148,6 +148,6 @@ func tradeToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Qu
 	q.Size = math.Abs((upd[2]).(float64))
 	q.Price = (upd[3]).(float64)
 	m.data[pair] = q
-	dataCh <- q
 	m.Unlock()
+	dataCh <- q
 }
