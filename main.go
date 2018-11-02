@@ -23,11 +23,30 @@ func main() {
 
 	// Create tables with initial data from http requests
 	println("Building tables...")
+	gdaxCh := make(chan *tview.Table)
+	bitfinexCh := make(chan *tview.Table)
+	hitbtcCh := make(chan *tview.Table)
+	geminiCh := make(chan *tview.Table)
+
 	overviewTbl := overview.Table()
-	gdaxTbl := exchanges["gdax"].Table(overviewTbl)
-	bitfinexTbl := exchanges["bitfinex"].Table(overviewTbl)
-	hitbtcTbl := exchanges["hitbtc"].Table(overviewTbl)
-	geminiTbl := exchanges["gemini"].Table(overviewTbl)
+	go func() {
+		gdaxCh <- exchanges["gdax"].Table(overviewTbl)
+
+	}()
+	go func() {
+		bitfinexCh <- exchanges["bitfinex"].Table(overviewTbl)
+	}()
+	go func() {
+		hitbtcCh <- exchanges["hitbtc"].Table(overviewTbl)
+	}()
+	go func() {
+		geminiCh <- exchanges["gemini"].Table(overviewTbl)
+	}()
+	gdaxTbl := <-gdaxCh
+	bitfinexTbl := <-bitfinexCh
+	hitbtcTbl := <-hitbtcCh
+	geminiTbl := <-geminiCh
+
 	mktView := overviewTbl
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
