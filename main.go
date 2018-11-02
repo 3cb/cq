@@ -9,8 +9,8 @@ import (
 	"github.com/3cb/cq/gemini"
 	"github.com/3cb/cq/hitbtc"
 	"github.com/3cb/cq/overview"
-	"github.com/3cb/tview"
 	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 func main() {
@@ -105,10 +105,12 @@ func main() {
 				}
 				app.QueueUpdate(upd.UpdOverviewRow(overviewTbl))
 				app.QueueUpdate(upd.UpdRow(t))
+				app.Draw()
 
 				time.Sleep(85 * time.Millisecond)
 				app.QueueUpdate(upd.ClrOverviewBold(overviewTbl))
 				app.QueueUpdate(upd.ClrBold(t))
+				app.Draw()
 			case tbl := <-view:
 				if mktView != tbl {
 					body.RemoveItem(mktView)
