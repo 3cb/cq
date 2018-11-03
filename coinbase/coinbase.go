@@ -3,6 +3,7 @@ package coinbase
 import (
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/3cb/cq/cq"
 	"github.com/gdamore/tcell"
@@ -117,11 +118,13 @@ func (m *Market) getSnapshot() []error {
 		go getStats(m, pairs[i], wg, errCh)
 		go getTicker(m, pairs[i], wg, errCh)
 	}
+	time.Sleep(1 * time.Second)
 	for i := 5; i < 10; i++ {
 		go getTrades(m, pairs[i], wg, errCh)
 		go getStats(m, pairs[i], wg, errCh)
 		go getTicker(m, pairs[i], wg, errCh)
 	}
+	time.Sleep(1 * time.Second)
 	for i := 10; i < 15; i++ {
 		go getTrades(m, pairs[i], wg, errCh)
 		go getStats(m, pairs[i], wg, errCh)
