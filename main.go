@@ -31,7 +31,6 @@ func main() {
 	overviewTbl := overview.Table()
 	go func() {
 		coinbaseCh <- exchanges["coinbase"].Table(overviewTbl)
-
 	}()
 	go func() {
 		bitfinexCh <- exchanges["bitfinex"].Table(overviewTbl)
