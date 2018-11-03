@@ -1,4 +1,4 @@
-package gdax
+package coinbase
 
 import (
 	"strings"
