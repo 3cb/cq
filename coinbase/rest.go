@@ -1,4 +1,4 @@
-package gdax
+package coinbase
 
 import (
 	"encoding/json"
@@ -22,7 +22,7 @@ func getTicker(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	ticker := Ticker{}
 
-	api := "https://api.gdax.com/products/" + pair + "/ticker"
+	api := "https://api.pro.coinbase.com/products/" + pair + "/ticker"
 	resp, err := http.Get(api)
 	if err != nil {
 		errCh <- err
@@ -62,7 +62,7 @@ func getStats(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	stats := Stats{}
 
-	api := "https://api.gdax.com/products/" + pair + "/stats"
+	api := "https://api.pro.coinbase.com/products/" + pair + "/stats"
 	resp, err := http.Get(api)
 	if err != nil {
 		errCh <- err
@@ -94,7 +94,7 @@ func getTrades(m *Market, pair string, wg *sync.WaitGroup, errCh chan error) {
 
 	slice := []Quote{}
 
-	api := "https://api.gdax.com/products/" + pair + "/trades?limit=1"
+	api := "https://api.pro.coinbase.com/products/" + pair + "/trades?limit=1"
 	resp, err := http.Get(api)
 	if err != nil {
 		errCh <- err

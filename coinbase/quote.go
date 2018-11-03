@@ -1,4 +1,4 @@
-package gdax
+package coinbase
 
 import (
 	"github.com/3cb/cq/cq"
@@ -31,7 +31,7 @@ type Quote struct {
 
 // MarketID returns the name of market as a string
 func (quote Quote) MarketID() string {
-	return "gdax"
+	return "coinbase"
 }
 
 // PairID returns name of product pair as a string

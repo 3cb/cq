@@ -33,7 +33,7 @@ func Table() *tview.Table {
 	table := tview.NewTable().
 		SetBorders(false)
 
-	table.SetCell(0, 1, tview.NewTableCell("              GDAX").
+	table.SetCell(0, 1, tview.NewTableCell("          Coinbase").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
@@ -119,7 +119,7 @@ func FindRow(quote cq.Quoter) int {
 // FindColumn uses MarketID string to find column in table
 func FindColumn(quote cq.Quoter) int {
 	switch quote.MarketID() {
-	case "gdax":
+	case "coinbase":
 		return 1
 	case "bitfinex":
 		return 2

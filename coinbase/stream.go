@@ -1,4 +1,4 @@
-package gdax
+package coinbase
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 		Channels:   []string{"matches", "ticker"},
 	}
 
-	conn, resp, err := websocket.DefaultDialer.Dial("wss://ws-feed.gdax.com", nil)
+	conn, resp, err := websocket.DefaultDialer.Dial("wss://ws-feed.pro.coinbase.com", nil)
 	if resp.StatusCode != 101 || err != nil {
 		return errors.New("unable to connect to gdax websocket api")
 	}

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/3cb/cq/bitfinex"
+	"github.com/3cb/cq/coinbase"
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/cq/gdax"
 	"github.com/3cb/cq/gemini"
 	"github.com/3cb/cq/hitbtc"
 	"github.com/3cb/cq/overview"
@@ -16,21 +16,21 @@ import (
 func main() {
 	// Initialize exchanges
 	exchanges := make(map[string]cq.Exchange)
-	exchanges["gdax"] = gdax.Init()
+	exchanges["coinbase"] = coinbase.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
 	exchanges["hitbtc"] = hitbtc.Init()
 	exchanges["gemini"] = gemini.Init()
 
 	// Create tables with initial data from http requests
 	println("Building tables...")
-	gdaxCh := make(chan *tview.Table)
+	coinbaseCh := make(chan *tview.Table)
 	bitfinexCh := make(chan *tview.Table)
 	hitbtcCh := make(chan *tview.Table)
 	geminiCh := make(chan *tview.Table)
 
 	overviewTbl := overview.Table()
 	go func() {
-		gdaxCh <- exchanges["gdax"].Table(overviewTbl)
+		coinbaseCh <- exchanges["coinbase"].Table(overviewTbl)
 
 	}()
 	go func() {
@@ -42,7 +42,7 @@ func main() {
 	go func() {
 		geminiCh <- exchanges["gemini"].Table(overviewTbl)
 	}()
-	gdaxTbl := <-gdaxCh
+	coinbaseTbl := <-coinbaseCh
 	bitfinexTbl := <-bitfinexCh
 	hitbtcTbl := <-hitbtcCh
 	geminiTbl := <-geminiCh
@@ -61,8 +61,8 @@ func main() {
 			view <- overviewTbl
 			<-done
 		}).
-		AddItem("GDAX", "", '2', func() {
-			view <- gdaxTbl
+		AddItem("Coinbase", "", '2', func() {
+			view <- coinbaseTbl
 			<-done
 		}).
 		AddItem("Bitfinex", "", '3', func() {
@@ -94,8 +94,8 @@ func main() {
 			case upd := <-data:
 				var t *tview.Table
 				switch upd.MarketID() {
-				case "gdax":
-					t = gdaxTbl
+				case "coinbase":
+					t = coinbaseTbl
 				case "bitfinex":
 					t = bitfinexTbl
 				case "hitbtc":
@@ -124,7 +124,7 @@ func main() {
 
 	println("Connecting to exchanges...")
 	// handle errors here *******************************
-	exchanges["gdax"].Stream(data)
+	exchanges["coinbase"].Stream(data)
 	exchanges["bitfinex"].Stream(data)
 	exchanges["hitbtc"].Stream(data)
 	exchanges["gemini"].Stream(data)
