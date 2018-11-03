@@ -111,10 +111,21 @@ func (m *Market) getSnapshot() []error {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(3 * l)
-	for _, pair := range pairs {
-		go getTrades(m, pair, wg, errCh)
-		go getStats(m, pair, wg, errCh)
-		go getTicker(m, pair, wg, errCh)
+	// break requests up into bursts to satisfy coinbase throttling
+	for i := 0; i < 5; i++ {
+		go getTrades(m, pairs[i], wg, errCh)
+		go getStats(m, pairs[i], wg, errCh)
+		go getTicker(m, pairs[i], wg, errCh)
+	}
+	for i := 5; i < 10; i++ {
+		go getTrades(m, pairs[i], wg, errCh)
+		go getStats(m, pairs[i], wg, errCh)
+		go getTicker(m, pairs[i], wg, errCh)
+	}
+	for i := 10; i < 15; i++ {
+		go getTrades(m, pairs[i], wg, errCh)
+		go getStats(m, pairs[i], wg, errCh)
+		go getTicker(m, pairs[i], wg, errCh)
 	}
 	wg.Wait()
 
