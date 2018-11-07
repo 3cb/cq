@@ -125,11 +125,13 @@ func main() {
 
 	println("Connecting to exchanges...")
 	// handle errors here *******************************
-	exchanges["coinbase"].Stream(routerCh)
-	exchanges["bitfinex"].Stream(routerCh)
-	exchanges["hitbtc"].Stream(routerCh)
-	exchanges["gemini"].Stream(routerCh)
-	// handle errors here *******************************
+	go func() {
+		exchanges["coinbase"].Stream(routerCh)
+		exchanges["bitfinex"].Stream(routerCh)
+		exchanges["hitbtc"].Stream(routerCh)
+		exchanges["gemini"].Stream(routerCh)
+		// handle errors here *******************************
+	}()
 
 	println("Launching app...")
 	if err := app.SetRoot(body, true).Run(); err != nil {
