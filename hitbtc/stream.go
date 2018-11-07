@@ -50,7 +50,7 @@ type WSMsg struct {
 	Params      interface{} `json:"params"`
 }
 
-func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
+func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 	var failedSubs []string
 
 	api := "wss://api.hitbtc.com/api/2/ws"
@@ -138,7 +138,7 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 				q.Volume = (p["volume"]).(string)
 				m.data[s] = q
 				m.Unlock()
-				dataCh <- q
+				timerCh <- cq.TimerMsg{IsTrade: false, Quote: q}
 			case "updateTrades":
 				p := (msg.Params).(map[string]interface{})
 				d := (p["data"]).([]interface{})
@@ -151,7 +151,7 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 				q.Size = (u["quantity"]).(string)
 				m.data[s] = q
 				m.Unlock()
-				dataCh <- q
+				timerCh <- cq.TimerMsg{IsTrade: true, Quote: q}
 			default:
 				continue
 			}

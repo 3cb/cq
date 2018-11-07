@@ -15,7 +15,7 @@ type Subscribe struct {
 	Channels   []string `json:"channels"`
 }
 
-func connectWS(m *Market, data chan cq.Quoter) error {
+func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 	wsSub := &Subscribe{
 		Type:       "subscribe",
 		ProductIds: m.pairs,
@@ -44,7 +44,7 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 				quote.Size = msg.Size
 				m.data[msg.ID] = quote
 				m.Unlock()
-				data <- quote
+				timerCh <- cq.TimerMsg{IsTrade: true, Quote: quote}
 			} else if msg.Type == "ticker" {
 				m.Lock()
 				quote := (m.data[msg.ID]).(Quote)
@@ -56,7 +56,8 @@ func connectWS(m *Market, data chan cq.Quoter) error {
 				quote.Volume = msg.Volume
 				m.data[msg.ID] = quote
 				m.Unlock()
-				data <- quote
+				timerCh <- cq.TimerMsg{IsTrade: false, Quote: quote}
+
 			}
 			msg = Quote{}
 		}

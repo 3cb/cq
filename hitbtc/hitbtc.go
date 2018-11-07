@@ -14,6 +14,7 @@ type Market struct {
 	sync.RWMutex
 	streaming bool
 	symbols   []string
+	ids       []string
 	data      map[string]cq.Quoter
 }
 
@@ -33,10 +34,12 @@ func Init() *Market {
 			"ZRXUSD",
 			"ZRXBTC",
 		},
+		ids:  []string{},
 		data: make(map[string]cq.Quoter),
 	}
 
 	for _, s := range m.symbols {
+		m.ids = append(m.ids, fmtID(s))
 		m.data[s] = Quote{
 			Symbol: s,
 			ID:     fmtID(s),
@@ -44,6 +47,11 @@ func Init() *Market {
 	}
 
 	return m
+}
+
+// GetIDs returns slice of pair IDs formatted with "/" (i.e., BTC/USD)
+func (m *Market) GetIDs() []string {
+	return m.ids
 }
 
 // Table returns an instance of tview.Table formatted for hitbtc ready for data
@@ -84,18 +92,15 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(tbl)()
-		quote.ClrBold(tbl)()
-		quote.UpdOverviewRow(overviewTbl)()
-		quote.ClrOverviewBold(overviewTbl)()
+		quote.TradeUpdate(overviewTbl, tbl, tcell.AttrNone)
 	}
 
 	return tbl
 }
 
 // Stream connects to websocket server and streams price quotes
-func (m *Market) Stream(dataCh chan cq.Quoter) error {
-	if err := connectWS(m, dataCh); err != nil {
+func (m *Market) Stream(timerCh chan<- cq.TimerMsg) error {
+	if err := connectWS(m, timerCh); err != nil {
 		return err
 	}
 

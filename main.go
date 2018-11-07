@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/coinbase"
 	"github.com/3cb/cq/cq"
@@ -85,14 +83,14 @@ func main() {
 		AddItem(menu, 20, 1, true).
 		AddItem(overviewTbl, 0, 1, false)
 
-	data := make(chan cq.Quoter, 500)
+	updateCh, routerCh := cq.NewTimerGroup(exchanges)
 
 	go func() {
 		for {
 			select {
-			case upd := <-data:
+			case upd := <-updateCh:
 				var t *tview.Table
-				switch upd.MarketID() {
+				switch upd.Quote.MarketID() {
 				case "coinbase":
 					t = coinbaseTbl
 				case "bitfinex":
@@ -102,14 +100,22 @@ func main() {
 				case "gemini":
 					t = geminiTbl
 				}
-				app.QueueUpdate(upd.UpdOverviewRow(overviewTbl))
-				app.QueueUpdate(upd.UpdRow(t))
-				app.Draw()
 
-				time.Sleep(85 * time.Millisecond)
-				app.QueueUpdate(upd.ClrOverviewBold(overviewTbl))
-				app.QueueUpdate(upd.ClrBold(t))
-				app.Draw()
+				switch upd.UpdType {
+				case "ticker":
+					// println("ticker")
+					app.QueueUpdate(upd.Quote.TickerUpdate(t))
+					app.Draw()
+				case "trade":
+					// println("trade")
+					if upd.Flash == true {
+						app.QueueUpdate(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrBold))
+					} else {
+						app.QueueUpdate(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrNone))
+					}
+					app.Draw()
+				}
+
 			case tbl := <-view:
 				if mktView != tbl {
 					body.RemoveItem(mktView)
@@ -123,10 +129,10 @@ func main() {
 
 	println("Connecting to exchanges...")
 	// handle errors here *******************************
-	exchanges["coinbase"].Stream(data)
-	exchanges["bitfinex"].Stream(data)
-	exchanges["hitbtc"].Stream(data)
-	exchanges["gemini"].Stream(data)
+	exchanges["coinbase"].Stream(routerCh)
+	exchanges["bitfinex"].Stream(routerCh)
+	exchanges["hitbtc"].Stream(routerCh)
+	exchanges["gemini"].Stream(routerCh)
 	// handle errors here *******************************
 
 	println("Launching app...")

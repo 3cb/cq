@@ -22,7 +22,7 @@ type ChannelStore struct {
 	Tickers map[float64]string
 }
 
-func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
+func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 	var subMsgs []*Subscribe
 
 	m.RLock()
@@ -77,9 +77,9 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 				case []interface{}:
 					pair, _ := queryStore(&store, id)
 					if upd, ok := (x[0]).([]interface{}); ok {
-						tradeToQuote(m, upd, pair, dataCh)
+						tradeToQuote(m, upd, pair, timerCh)
 					} else {
-						tickerToQuote(m, x, pair, dataCh)
+						tickerToQuote(m, x, pair, timerCh)
 					}
 
 				// this case asserts trades updates
@@ -87,7 +87,7 @@ func connectWS(m *Market, dataCh chan<- cq.Quoter) error {
 					if msg[1] == "tu" {
 						upd := (msg[2]).([]interface{})
 						pair, _ := queryStore(&store, id)
-						tradeToQuote(m, upd, pair, dataCh)
+						tradeToQuote(m, upd, pair, timerCh)
 					} // handle "hb" case here ***
 				}
 			}
@@ -127,7 +127,7 @@ func queryStore(store *ChannelStore, id float64) (string, string) {
 	return pair, "ticker"
 }
 
-func tickerToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Quoter) {
+func tickerToQuote(m *Market, upd []interface{}, pair string, timerCh chan<- cq.TimerMsg) {
 	m.Lock()
 	q := (m.data[pair]).(Quote)
 	q.Bid = (upd[0]).(float64)
@@ -139,15 +139,15 @@ func tickerToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Q
 	q.Low = (upd[9]).(float64)
 	m.data[pair] = q
 	m.Unlock()
-	dataCh <- q
+	timerCh <- cq.TimerMsg{IsTrade: false, Quote: q}
 }
 
-func tradeToQuote(m *Market, upd []interface{}, pair string, dataCh chan<- cq.Quoter) {
+func tradeToQuote(m *Market, upd []interface{}, pair string, timerCh chan<- cq.TimerMsg) {
 	m.Lock()
 	q := (m.data[pair]).(Quote)
 	q.Size = math.Abs((upd[2]).(float64))
 	q.Price = (upd[3]).(float64)
 	m.data[pair] = q
 	m.Unlock()
-	dataCh <- q
+	timerCh <- cq.TimerMsg{IsTrade: true, Quote: q}
 }

@@ -14,6 +14,7 @@ type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
+	ids       []string
 	data      map[string]cq.Quoter
 }
 
@@ -40,10 +41,12 @@ func Init() *Market {
 			"tZRXUSD",
 			"tZRXBTC",
 		},
+		ids:  []string{},
 		data: make(map[string]cq.Quoter),
 	}
 
 	for _, pair := range m.pairs {
+		m.ids = append(m.ids, fmtID(pair))
 		m.data[pair] = Quote{
 			Symbol: pair,
 			ID:     fmtID(pair),
@@ -51,6 +54,11 @@ func Init() *Market {
 	}
 
 	return m
+}
+
+// GetIDs returns slice of pair IDs formatted with "/" (i.e., BTC/USD)
+func (m *Market) GetIDs() []string {
+	return m.ids
 }
 
 // Table returns an instance of tview.Table formatted for bitfinex ready for data
@@ -91,10 +99,7 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(tbl)()
-		quote.ClrBold(tbl)()
-		quote.UpdOverviewRow(overviewTbl)()
-		quote.ClrOverviewBold(overviewTbl)()
+		quote.TradeUpdate(overviewTbl, tbl, tcell.AttrNone)
 	}
 
 	return tbl
@@ -127,8 +132,8 @@ func (m *Market) getSnapshot() []error {
 
 // Stream connects to Bitfinex websocket API and sends messages to data channel
 // to update market and overview tables
-func (m *Market) Stream(data chan cq.Quoter) error {
-	err := connectWS(m, data)
+func (m *Market) Stream(timerCh chan<- cq.TimerMsg) error {
+	err := connectWS(m, timerCh)
 	if err != nil {
 		return err
 	}

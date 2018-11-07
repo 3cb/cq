@@ -43,7 +43,7 @@ type WSMessage struct {
 }
 
 // wss://api.gemini.com/v1/marketdata/:symbol
-func connectWS(m *Market, data chan<- cq.Quoter) error {
+func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 	var sockets []string
 
 	m.Lock()
@@ -82,7 +82,8 @@ func connectWS(m *Market, data chan<- cq.Quoter) error {
 					updateBidAsk(&q, msg.Events[0])
 					m.data[pair] = q
 					m.Unlock()
-					data <- q
+					timerCh <- cq.TimerMsg{IsTrade: false, Quote: q}
+
 				case 2:
 					if t := (msg.Events[0]["type"]).(string); t == "trade" {
 						m.Lock()
@@ -91,8 +92,9 @@ func connectWS(m *Market, data chan<- cq.Quoter) error {
 						updateBidAsk(&q, msg.Events[1])
 						m.data[pair] = q
 						m.Unlock()
-						data <- q
+						timerCh <- cq.TimerMsg{IsTrade: true, Quote: q}
 					}
+
 				default:
 					continue
 				}

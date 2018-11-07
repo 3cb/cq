@@ -15,6 +15,7 @@ type Market struct {
 	sync.RWMutex
 	streaming bool
 	pairs     []string
+	ids       []string
 	data      map[string]cq.Quoter
 }
 
@@ -39,16 +40,23 @@ func Init() *Market {
 			"ZRX-USD",
 			"ZRX-BTC",
 		},
+		ids:  []string{},
 		data: make(map[string]cq.Quoter),
 	}
 
 	for _, pair := range m.pairs {
+		m.ids = append(m.ids, fmtID(pair))
 		m.data[pair] = Quote{
 			ID: fmtID(pair),
 		}
 	}
 
 	return m
+}
+
+// GetIDs returns slice of pair IDs formatted with "/" (i.e., BTC/USD)
+func (m *Market) GetIDs() []string {
+	return m.ids
 }
 
 // Table method uses market data to create and return an
@@ -90,10 +98,7 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.UpdRow(table)()
-		quote.ClrBold(table)()
-		quote.UpdOverviewRow(overviewTbl)()
-		quote.ClrOverviewBold(overviewTbl)()
+		quote.TradeUpdate(overviewTbl, table, tcell.AttrNone)
 	}
 
 	return table
@@ -142,8 +147,8 @@ func (m *Market) getSnapshot() []error {
 
 // Stream connects to websocket connection and starts goroutine to update state of GDAX
 // market with data from websocket messages
-func (m *Market) Stream(data chan cq.Quoter) error {
-	err := connectWS(m, data)
+func (m *Market) Stream(timerCh chan<- cq.TimerMsg) error {
+	err := connectWS(m, timerCh)
 	if err != nil {
 		return err
 	}
