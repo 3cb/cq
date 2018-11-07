@@ -93,7 +93,7 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	m.Unlock()
 
 	for _, quote := range data {
-		quote.TradeUpdate(overviewTbl, table, tcell.AttrNone)
+		quote.TradeUpdate(overviewTbl, table, tcell.AttrNone)()
 	}
 
 	return table

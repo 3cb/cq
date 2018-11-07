@@ -96,7 +96,7 @@ func (q Quote) TickerUpdate(table *tview.Table) func() {
 	}
 }
 
-func (q Quote) TradeUpdate(overviewTbl *tview.Table, table *tview.Table, attr tcell.AttrMask) func() {
+func (q Quote) TradeUpdate(oTable *tview.Table, table *tview.Table, attr tcell.AttrMask) func() {
 	return func() {
 		// update exchange table
 		row := q.findTblRow()
@@ -104,131 +104,41 @@ func (q Quote) TradeUpdate(overviewTbl *tview.Table, table *tview.Table, attr tc
 
 		table.GetCell(row, 0).
 			SetText(q.ID).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 1).
 			SetText(cq.FmtPrice(q.Price)).
 			SetTextColor(color).
 			SetAttributes(attr)
 		table.GetCell(row, 2).
 			SetText(delta).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 3).
 			SetText(cq.FmtSize(q.Size)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 4).
 			SetText(cq.FmtPrice(q.Bid)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 5).
 			SetText(cq.FmtPrice(q.Ask)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 6).
 			SetText(cq.FmtPrice(q.Low)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 7).
 			SetText(cq.FmtPrice(q.High)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 		table.GetCell(row, 8).
 			SetText(cq.FmtVolume(q.Volume)).
-			SetTextColor(color).
-			SetAttributes(attr)
+			SetTextColor(color)
 
 		// update overview table
 		row = overview.FindRow(q)
 		col := overview.FindColumn(q)
 		_, color = cq.FmtDelta(q.Price, q.Open)
 
-		table.GetCell(row, col).
+		oTable.GetCell(row, col).
 			SetText(cq.FmtPrice(q.Price)).
 			SetTextColor(color).
 			SetAttributes(attr)
 	}
 }
-
-// UpdRow refreshes table with new data from websocket message
-// func (q Quote) UpdRow(table *tview.Table, updType string, isBold bool) func() {
-// 	return func() {
-// 		row := q.findTblRow()
-// 		delta, color := cq.FmtDelta(q.Price, q.Open)
-
-// 		table.GetCell(row, 0).
-// 			SetText(q.ID).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 1).
-// 			SetText(cq.FmtPrice(q.Price)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 2).
-// 			SetText(delta).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 3).
-// 			SetText(cq.FmtSize(q.Size)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 4).
-// 			SetText(cq.FmtPrice(q.Bid)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 5).
-// 			SetText(cq.FmtPrice(q.Ask)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 6).
-// 			SetText(cq.FmtPrice(q.Low)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 7).
-// 			SetText(cq.FmtPrice(q.High)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 		table.GetCell(row, 8).
-// 			SetText(cq.FmtVolume(q.Volume)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 	}
-// }
-
-// // ClrBold resets "Price" cell's attributes to remove bold font
-// func (q Quote) ClrBold(table *tview.Table) func() {
-// 	return func() {
-// 		row := q.findTblRow()
-
-// 		for col := 0; col <= 8; col++ {
-// 			table.GetCell(row, col).
-// 				SetAttributes(tcell.AttrNone)
-// 		}
-// 	}
-// }
-
-// // UpdOverviewRow resets price quote in overview display
-// func (q Quote) UpdOverviewRow(table *tview.Table, updType string, isBold bool) func() {
-// 	return func() {
-// 		row := overview.FindRow(q)
-// 		col := overview.FindColumn(q)
-// 		_, color := cq.FmtDelta(q.Price, q.Open)
-
-// 		table.GetCell(row, col).
-// 			SetText(cq.FmtPrice(q.Price)).
-// 			SetTextColor(color).
-// 			SetAttributes(tcell.AttrBold)
-// 	}
-// }
-
-// ClrOverviewBold removes bold font from Price cells in overview display
-// func (q Quote) ClrOverviewBold(table *tview.Table) func() {
-// 	return func() {
-// 		row := overview.FindRow(q)
-// 		col := overview.FindColumn(q)
-
-// 		table.GetCell(row, col).
-// 			SetAttributes(tcell.AttrNone)
-// 	}
-// }

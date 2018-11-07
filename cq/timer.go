@@ -6,7 +6,7 @@ import (
 )
 
 const queueSize = 200
-const timerDuration = (115 * time.Millisecond)
+const timerDuration = (300 * time.Millisecond)
 
 // TimerGroup contains matrix of all the flash timers
 type TimerGroup struct {
@@ -42,6 +42,7 @@ func NewTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerMsg
 
 // start goroutine per exchange per trading pair to track flash times
 func startTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan TimerMsg) {
+	// start individual timer loops
 	tg.Lock()
 	for _, pairMap := range tg.list {
 		for _, ch := range pairMap {
@@ -53,7 +54,6 @@ func startTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Time
 
 				// ignore first value from timer
 				<-timer.C
-				println("trade")
 
 				for {
 					select {
@@ -64,9 +64,7 @@ func startTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Time
 					case msg := <-ch:
 						switch msg.IsTrade {
 						case true:
-							if !timer.Stop() {
-								<-timer.C
-							}
+							timer.Stop()
 							timer.Reset(timerDuration)
 							lastTime = time.Now()
 							lastQuote = msg.Quote
@@ -82,11 +80,12 @@ func startTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Time
 	}
 	tg.Unlock()
 
-	// event loop routes messages to corresponding timer loop
+	// router loop directs messages to corresponding timer loop
 	for {
 		msg := <-routerCh
 		tg.RLock()
-		tg.list[msg.Quote.MarketID()][msg.Quote.PairID()] <- msg
+		ch := tg.list[msg.Quote.MarketID()][msg.Quote.PairID()]
 		tg.RUnlock()
+		ch <- msg
 	}
 }

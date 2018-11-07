@@ -46,7 +46,7 @@ func main() {
 
 	mktView := overviewTbl
 
-	tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
+	// tview.Styles.PrimitiveBackgroundColor = tcell.ColorBlack
 
 	app := tview.NewApplication()
 
@@ -66,7 +66,7 @@ func main() {
 			view <- bitfinexTbl
 			<-done
 		}).
-		AddItem("BitBTC", "", '4', func() {
+		AddItem("HitBTC", "", '4', func() {
 			view <- hitbtcTbl
 			<-done
 		}).
@@ -103,17 +103,13 @@ func main() {
 
 				switch upd.UpdType {
 				case "ticker":
-					// println("ticker")
-					app.QueueUpdate(upd.Quote.TickerUpdate(t))
-					app.Draw()
+					app.QueueUpdateDraw(upd.Quote.TickerUpdate(t))
 				case "trade":
-					// println("trade")
 					if upd.Flash == true {
-						app.QueueUpdate(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrBold))
+						app.QueueUpdateDraw(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrReverse))
 					} else {
-						app.QueueUpdate(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrNone))
+						app.QueueUpdateDraw(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrNone))
 					}
-					app.Draw()
 				}
 
 			case tbl := <-view:
