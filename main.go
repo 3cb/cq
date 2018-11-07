@@ -4,7 +4,6 @@ import (
 	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/coinbase"
 	"github.com/3cb/cq/cq"
-	"github.com/3cb/cq/gemini"
 	"github.com/3cb/cq/hitbtc"
 	"github.com/3cb/cq/overview"
 	"github.com/gdamore/tcell"
@@ -17,14 +16,12 @@ func main() {
 	exchanges["coinbase"] = coinbase.Init()
 	exchanges["bitfinex"] = bitfinex.Init()
 	exchanges["hitbtc"] = hitbtc.Init()
-	exchanges["gemini"] = gemini.Init()
 
 	// Create tables with initial data from http requests
 	println("Building tables...")
 	coinbaseCh := make(chan *tview.Table)
 	bitfinexCh := make(chan *tview.Table)
 	hitbtcCh := make(chan *tview.Table)
-	geminiCh := make(chan *tview.Table)
 
 	overviewTbl := overview.Table()
 	go func() {
@@ -36,13 +33,9 @@ func main() {
 	go func() {
 		hitbtcCh <- exchanges["hitbtc"].Table(overviewTbl)
 	}()
-	go func() {
-		geminiCh <- exchanges["gemini"].Table(overviewTbl)
-	}()
 	coinbaseTbl := <-coinbaseCh
 	bitfinexTbl := <-bitfinexCh
 	hitbtcTbl := <-hitbtcCh
-	geminiTbl := <-geminiCh
 
 	mktView := overviewTbl
 
@@ -70,10 +63,6 @@ func main() {
 			view <- hitbtcTbl
 			<-done
 		}).
-		AddItem("Gemini", "", '5', func() {
-			view <- geminiTbl
-			<-done
-		}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.Stop()
 		})
@@ -97,8 +86,6 @@ func main() {
 					t = bitfinexTbl
 				case "hitbtc":
 					t = hitbtcTbl
-				case "gemini":
-					t = geminiTbl
 				}
 
 				switch upd.UpdType {
@@ -129,7 +116,6 @@ func main() {
 		exchanges["coinbase"].Stream(routerCh)
 		exchanges["bitfinex"].Stream(routerCh)
 		exchanges["hitbtc"].Stream(routerCh)
-		exchanges["gemini"].Stream(routerCh)
 		// handle errors here *******************************
 	}()
 
