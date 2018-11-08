@@ -82,7 +82,7 @@ func (quote Quote) findTblRow() int {
 	}
 }
 
-func (quote Quote) TickerUpdate(tbl *tview.Table) func() {
+func (quote Quote) InsertTicker(tbl *tview.Table) func() {
 	return func() {
 		var color tcell.Color
 
@@ -134,7 +134,7 @@ func (quote Quote) TickerUpdate(tbl *tview.Table) func() {
 	}
 }
 
-func (quote Quote) TradeUpdate(overviewTbl *tview.Table, tbl *tview.Table, attr tcell.AttrMask) func() {
+func (quote Quote) InsertTrade(overviewTbl *tview.Table, tbl *tview.Table, attr tcell.AttrMask) func() {
 	return func() {
 		// update exchange table
 		var color tcell.Color

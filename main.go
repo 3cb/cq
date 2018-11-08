@@ -90,12 +90,12 @@ func main() {
 
 				switch upd.UpdType {
 				case "ticker":
-					app.QueueUpdateDraw(upd.Quote.TickerUpdate(t))
+					app.QueueUpdateDraw(upd.Quote.InsertTicker(t))
 				case "trade":
 					if upd.Flash == true {
-						app.QueueUpdateDraw(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrReverse))
+						app.QueueUpdateDraw(upd.Quote.InsertTrade(overviewTbl, t, tcell.AttrReverse))
 					} else {
-						app.QueueUpdateDraw(upd.Quote.TradeUpdate(overviewTbl, t, tcell.AttrNone))
+						app.QueueUpdateDraw(upd.Quote.InsertTrade(overviewTbl, t, tcell.AttrNone))
 					}
 				}
 

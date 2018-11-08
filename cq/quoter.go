@@ -16,17 +16,15 @@ type UpdateMsg struct {
 // Quoter is an interface that market quotes implement to initialize
 // and update data in gui table
 type Quoter interface {
+	// returns the name of the exchange as all lowercase string
 	MarketID() string
+
+	// returns name of trading pair all caps separated by "/" (e.g., BTC/USD)
 	PairID() string
 
-	// UpdRow updates exchange table row with new quote data and changes
-	// font to bold to signal change in data
-	//
-	// boolean parameter should be true for boldface quote
-	// UpdRow(*tview.Table, tcell.AttrMask) func()
+	// Insert new quote data into market and overview tables with formatting for flash
+	InsertTrade(*tview.Table, *tview.Table, tcell.AttrMask) func()
 
-	// UpdOverviewRow(*tview.Table, tcell.AttrMask) func()
-
-	TradeUpdate(*tview.Table, *tview.Table, tcell.AttrMask) func()
-	TickerUpdate(*tview.Table) func()
+	// Insert new quote data into market table without altering flash state
+	InsertTicker(*tview.Table) func()
 }

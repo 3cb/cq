@@ -61,7 +61,7 @@ func (q Quote) findTblRow() int {
 	}
 }
 
-func (q Quote) TickerUpdate(table *tview.Table) func() {
+func (q Quote) InsertTicker(table *tview.Table) func() {
 	return func() {
 		row := q.findTblRow()
 		delta, color := cq.FmtDelta(q.Price, q.Open)
@@ -96,7 +96,7 @@ func (q Quote) TickerUpdate(table *tview.Table) func() {
 	}
 }
 
-func (q Quote) TradeUpdate(oTable *tview.Table, table *tview.Table, attr tcell.AttrMask) func() {
+func (q Quote) InsertTrade(oTable *tview.Table, table *tview.Table, attr tcell.AttrMask) func() {
 	return func() {
 		// update exchange table
 		row := q.findTblRow()
