@@ -38,26 +38,26 @@ func (q Quote) PairID() string {
 func (q Quote) findTblRow() int {
 	switch q.ID {
 	case "BTC/USD":
-		return 2
+		return 1
 	case "BCH/USD":
-		return 5
+		return 2
 	case "ETH/USD":
-		return 8
+		return 3
 	case "ETH/BTC":
-		return 10
+		return 4
 	case "LTC/USD":
-		return 13
+		return 5
 	case "LTC/BTC":
-		return 15
+		return 6
 	case "ZEC/USD":
-		return 18
+		return 7
 	case "ZEC/BTC":
-		return 20
+		return 8
 	case "ZRX/USD":
-		return 23
+		return 9
 	// case "ZRX/BTC":
 	default:
-		return 25
+		return 10
 	}
 }
 
