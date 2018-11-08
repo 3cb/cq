@@ -72,7 +72,7 @@ func main() {
 		AddItem(menu, 20, 1, true).
 		AddItem(overviewTbl, 0, 1, false)
 
-	updateCh, routerCh := cq.NewTimerGroup(exchanges)
+	updateCh, routerCh := cq.StartTimerGroup(exchanges)
 
 	go func() {
 		for {

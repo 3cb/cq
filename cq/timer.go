@@ -14,13 +14,15 @@ type TimerGroup struct {
 	list map[string]map[string]chan TimerMsg
 }
 
+// TimerMsg is used to carry quotes from package websocket loops
+// to TimerGroup event loop
 type TimerMsg struct {
 	IsTrade bool
 	Quote   Quoter
 }
 
-// NewTimerGroup creates double map with timers
-func NewTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerMsg) {
+// StartTimerGroup creates double map with timers
+func StartTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerMsg) {
 	tg := &TimerGroup{
 		list: make(map[string]map[string]chan TimerMsg),
 	}
@@ -35,13 +37,13 @@ func NewTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerMsg
 		}
 	}
 
-	go startTimers(tg, updateCh, routerCh)
+	go launchTimers(tg, updateCh, routerCh)
 
 	return updateCh, routerCh
 }
 
 // start goroutine per exchange per trading pair to track flash times
-func startTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan TimerMsg) {
+func launchTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan TimerMsg) {
 	// start individual timer loops
 	tg.Lock()
 	for _, pairMap := range tg.list {

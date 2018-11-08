@@ -5,6 +5,8 @@ import (
 	"github.com/rivo/tview"
 )
 
+// UpdateMsg carries quotes from TimerGroup event loop to main cq event loop
+// UpdType and Flash fields allow event loop to set table fonts for quotes
 type UpdateMsg struct {
 	UpdType string // "trade" or "ticker"
 	Flash   bool
