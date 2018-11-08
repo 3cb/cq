@@ -75,7 +75,8 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 	}
 
 	table := tview.NewTable().
-		SetBorders(false)
+		SetBorders(true).
+		SetBordersColor(tcell.ColorLightSlateGray)
 
 	for i, header := range headers {
 		table.SetCell(0, i, tview.NewTableCell(header).
@@ -83,9 +84,9 @@ func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
 			SetAlign(tview.AlignRight))
 	}
 
-	for r := 1; r <= 34; r++ {
+	for r := 1; r < len(m.pairs)+1; r++ {
 		for c := 0; c <= 8; c++ {
-			table.SetCell(r, c, tview.NewTableCell("").
+			table.SetCell(r, c, tview.NewTableCell("-").
 				SetAlign(tview.AlignRight))
 		}
 	}

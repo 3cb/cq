@@ -31,33 +31,34 @@ func Table() *tview.Table {
 	}
 
 	table := tview.NewTable().
-		SetBorders(false)
+		SetBorders(true).
+		SetBordersColor(tcell.ColorLightSlateGray)
 
-	table.SetCell(0, 1, tview.NewTableCell("          Coinbase").
+	table.SetCell(0, 1, tview.NewTableCell("  Coinbase").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 2, tview.NewTableCell("          Bitfinex").
+	table.SetCell(0, 2, tview.NewTableCell("  Bitfinex").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 3, tview.NewTableCell("            HitBTC").
+	table.SetCell(0, 3, tview.NewTableCell("    HitBTC").
 		SetTextColor(tcell.ColorYellow).
 		SetAlign(tview.AlignRight))
 
 	for i, pair := range rowLbl {
-		row := 2 * (i + 1)
+		row := i + 1
 		table.SetCell(row, 0, tview.NewTableCell(pair).
 			SetTextColor(tcell.ColorWhite).
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 1, tview.NewTableCell("").
+		table.SetCell(row, 1, tview.NewTableCell("-").
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 2, tview.NewTableCell("").
+		table.SetCell(row, 2, tview.NewTableCell("-").
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 3, tview.NewTableCell("").
+		table.SetCell(row, 3, tview.NewTableCell("-").
 			SetAlign(tview.AlignRight))
 	}
 
@@ -68,44 +69,44 @@ func Table() *tview.Table {
 func FindRow(quote cq.Quoter) int {
 	switch quote.PairID() {
 	case "BTC/USD":
-		return 2
+		return 1
 	case "BTC/EUR":
-		return 4
+		return 2
 	case "BTC/GBP":
-		return 6
+		return 3
 	case "BTC/JPY":
-		return 8
+		return 4
 	case "BCH/USD":
-		return 10
+		return 5
 	case "BCH/BTC":
-		return 12
+		return 6
 	case "BCH/EUR":
-		return 14
+		return 7
 	case "ETH/USD":
-		return 16
+		return 8
 	case "ETH/BTC":
-		return 18
+		return 9
 	case "ETH/EUR":
-		return 20
+		return 10
 	case "ETH/GBP":
-		return 22
+		return 11
 	case "ETH/JPY":
-		return 24
+		return 12
 	case "LTC/USD":
-		return 26
+		return 13
 	case "LTC/BTC":
-		return 28
+		return 14
 	case "LTC/EUR":
-		return 30
+		return 15
 	case "ZEC/USD":
-		return 32
+		return 16
 	case "ZEC/BTC":
-		return 34
+		return 17
 	case "ZRX/USD":
-		return 36
+		return 18
 	// case "ZRX/BTC":
 	default:
-		return 38
+		return 19
 	}
 }
 

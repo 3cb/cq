@@ -27,8 +27,6 @@ type Quote struct {
 	Low    string `json:"low_24h"`    // getStats/ticker
 	Open   string `json:"open_24h"`   // getStats/ticker
 	Volume string `json:"volume_24h"` // getStats/ticker
-
-	bold bool
 }
 
 // MarketID returns the name of market as a string
@@ -46,36 +44,36 @@ func (quote Quote) PairID() string {
 func (quote Quote) findTblRow() int {
 	switch quote.ID {
 	case "BTC/USD":
-		return 2
+		return 1
 	case "BTC/EUR":
-		return 4
+		return 2
 	case "BTC/GBP":
-		return 6
+		return 3
 	case "BCH/USD":
-		return 9
+		return 4
 	case "BCH/BTC":
-		return 11
+		return 5
 	case "BCH/EUR":
-		return 13
+		return 6
 	case "ETH/USD":
-		return 16
+		return 7
 	case "ETH/BTC":
-		return 18
+		return 8
 	case "ETH/EUR":
-		return 20
+		return 9
 	case "ETH/GBP":
-		return 22
+		return 10
 	case "LTC/USD":
-		return 25
+		return 11
 	case "LTC/BTC":
-		return 27
+		return 12
 	case "LTC/EUR":
-		return 29
+		return 13
 	case "ZRX/USD":
-		return 32
+		return 14
 	// case "ZRX/BTC":
 	default:
-		return 34
+		return 15
 	}
 }
 
