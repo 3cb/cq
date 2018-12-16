@@ -29,15 +29,18 @@ func Test_FmtDelta(t *testing.T) {
 	tc := []struct {
 		inprice  string
 		inopen   string
+		intheme  string
 		expdelta string
 		expcolor tcell.Color
 	}{
-		{"1000.00", "1200.00", "  -16.67%", tcell.ColorRed},
-		{"1000.00", "900.00", "   11.11%", tcell.ColorGreen},
+		{"1000.00", "1200.00", "dark", "  -16.67%", tcell.ColorRed},
+		{"1000.00", "900.00", "light", "   11.11%", tcell.ColorGreen},
 	}
 
 	for _, c := range tc {
-		delta, color := FmtDelta(c.inprice, c.inopen)
+		f := true
+		cfg := SetConfig(&c.intheme, &f)
+		delta, color := FmtDelta(c.inprice, c.inopen, cfg)
 		if delta != c.expdelta || color != c.expcolor {
 			t.Errorf("expected %v and %v; got %v and %v", c.expdelta, c.expcolor, delta, color)
 		}

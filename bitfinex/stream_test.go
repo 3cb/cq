@@ -81,7 +81,7 @@ func Test_streaming(t *testing.T) {
 
 	t.Run("test tickerToQuote", func(t *testing.T) {
 		m := Init()
-		dataCh := make(chan cq.Quoter)
+		dataCh := make(chan cq.TimerMsg)
 		pair := "tBTCUSD"
 		upd := []interface{}{
 			6615.5,
@@ -95,19 +95,19 @@ func Test_streaming(t *testing.T) {
 			6779.9,
 			6609.3,
 		}
-		expected := Quote{
-			Bid:        6615.5,
-			Ask:        6617.7,
-			Change:     -112.7,
-			ChangePerc: -0.0167,
-			Volume:     11108.82107481,
-			High:       6779.9,
-			Low:        6609.3,
+		expected := cq.Quote{
+			Bid:        "6615.5",
+			Ask:        "6617.7",
+			Change:     "-112.7",
+			ChangePerc: "-0.0167",
+			Volume:     "11108.82107481",
+			High:       "6779.9",
+			Low:        "6609.3",
 		}
 
 		go tickerToQuote(m, upd, pair, dataCh)
-		actualCh := (<-dataCh).(Quote)
-		actual := (m.data[pair]).(Quote)
+		actualCh := <-dataCh
+		actual := m.data[pair]
 
 		if actual.Bid != expected.Bid || actualCh.Bid != expected.Bid {
 			t.Errorf("expected %v and %v; got %v and %v", expected.Bid, expected.Bid, actual.Bid, actualCh.Bid)
@@ -134,7 +134,7 @@ func Test_streaming(t *testing.T) {
 
 	t.Run("test tradeToQuote", func(t *testing.T) {
 		m := Init()
-		dataCh2 := make(chan cq.Quoter)
+		dataCh2 := make(chan cq.TimerMsg)
 		pair := "tBTCUSD"
 		tc := [][]interface{}{
 			{306300718, 1540146321621, -0.01997, 6625.6},
@@ -142,29 +142,29 @@ func Test_streaming(t *testing.T) {
 			{306300690, 1540146285976, 0.015513, 6625.7},
 			{306300688, 1540146282272, -0.05, 6625.6},
 		}
-		expected := []Quote{
+		expected := []cq.Quote{
 			{
-				Price: 6625.6,
-				Size:  0.01997,
+				Price: "6625.6",
+				Size:  "0.01997",
 			},
 			{
-				Price: 6625.7,
-				Size:  0.10700401,
+				Price: "6625.7",
+				Size:  "0.10700401",
 			},
 			{
-				Price: 6625.7,
-				Size:  0.015513,
+				Price: "6625.7",
+				Size:  "0.015513",
 			},
 			{
-				Price: 6625.6,
-				Size:  0.05,
+				Price: "6625.6",
+				Size:  "0.05",
 			},
 		}
 
 		for i, c := range tc {
 			go tradeToQuote(m, c, pair, dataCh2)
-			actualCh := (<-dataCh2).(Quote)
-			actual := (m.data[pair]).(Quote)
+			actualCh := <-dataCh2
+			actual := m.data[pair]
 
 			if actual.Price != expected[i].Price || actualCh.Price != expected[i].Price {
 				t.Errorf("expected %v and %v; got %v and %v", expected[i].Price, expected[i].Price, actual.Price, actualCh.Price)
