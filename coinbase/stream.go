@@ -7,15 +7,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Subscribe is the structure for the subscription message sent to GDAX websocket API
-// https://docs.gdax.com/#subscribe
+// Subscribe is the structure for the subscription message sent to Coinbase websocket API
+// https://docs.pro.coinbase.com/#websocket-feed
 type Subscribe struct {
 	Type       string   `json:"type"`
 	ProductIds []string `json:"product_ids"`
 	Channels   []string `json:"channels"`
 }
 
-func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
+func connectWS(m *Market, routerCh chan<- cq.TimerMsg) error {
 	wsSub := &Subscribe{
 		Type:       "subscribe",
 		ProductIds: m.pairs,
@@ -29,7 +29,7 @@ func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 	conn.WriteJSON(wsSub)
 
 	go func() {
-		msg := Quote{}
+		msg := Data{}
 		for {
 			err := conn.ReadJSON(&msg)
 			if err != nil {
@@ -39,27 +39,32 @@ func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 
 			if msg.Type == "match" {
 				m.Lock()
-				quote := (m.data[msg.ID]).(Quote)
+				quote := m.data[msg.Pair]
 				quote.Price = msg.Price
 				quote.Size = msg.Size
-				m.data[msg.ID] = quote
+				m.data[msg.Pair] = quote
 				m.Unlock()
-				timerCh <- cq.TimerMsg{IsTrade: true, Quote: quote}
+				routerCh <- cq.TimerMsg{
+					Quote:   quote,
+					IsTrade: true,
+				}
 			} else if msg.Type == "ticker" {
 				m.Lock()
-				quote := (m.data[msg.ID]).(Quote)
+				quote := m.data[msg.Pair]
 				quote.Bid = msg.Bid
 				quote.Ask = msg.Ask
 				quote.High = msg.High
 				quote.Low = msg.Low
 				quote.Open = msg.Open
 				quote.Volume = msg.Volume
-				m.data[msg.ID] = quote
+				m.data[msg.Pair] = quote
 				m.Unlock()
-				timerCh <- cq.TimerMsg{IsTrade: false, Quote: quote}
-
+				routerCh <- cq.TimerMsg{
+					Quote:   quote,
+					IsTrade: false,
+				}
 			}
-			msg = Quote{}
+			msg = Data{}
 		}
 	}()
 

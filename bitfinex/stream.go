@@ -3,6 +3,7 @@ package bitfinex
 import (
 	"errors"
 	"math"
+	"strconv"
 
 	"github.com/3cb/cq/cq"
 	"github.com/gorilla/websocket"
@@ -129,25 +130,31 @@ func queryStore(store *ChannelStore, id float64) (string, string) {
 
 func tickerToQuote(m *Market, upd []interface{}, pair string, timerCh chan<- cq.TimerMsg) {
 	m.Lock()
-	q := (m.data[pair]).(Quote)
-	q.Bid = (upd[0]).(float64)
-	q.Ask = (upd[2]).(float64)
-	q.Change = (upd[4]).(float64)
-	q.ChangePerc = (upd[5]).(float64)
-	q.Volume = (upd[7]).(float64)
-	q.High = (upd[8]).(float64)
-	q.Low = (upd[9]).(float64)
+	q := m.data[pair]
+	q.Bid = strconv.FormatFloat((upd[0]).(float64), 'f', -1, 64)
+	q.Ask = strconv.FormatFloat((upd[2]).(float64), 'f', -1, 64)
+	q.Change = strconv.FormatFloat((upd[4]).(float64), 'f', -1, 64)
+	q.ChangePerc = strconv.FormatFloat((upd[5]).(float64), 'f', -1, 64)
+	q.Volume = strconv.FormatFloat((upd[7]).(float64), 'f', -1, 64)
+	q.High = strconv.FormatFloat((upd[8]).(float64), 'f', -1, 64)
+	q.Low = strconv.FormatFloat((upd[9]).(float64), 'f', -1, 64)
 	m.data[pair] = q
 	m.Unlock()
-	timerCh <- cq.TimerMsg{IsTrade: false, Quote: q}
+	timerCh <- cq.TimerMsg{
+		IsTrade: false,
+		Quote:   q,
+	}
 }
 
 func tradeToQuote(m *Market, upd []interface{}, pair string, timerCh chan<- cq.TimerMsg) {
 	m.Lock()
-	q := (m.data[pair]).(Quote)
-	q.Size = math.Abs((upd[2]).(float64))
-	q.Price = (upd[3]).(float64)
+	q := m.data[pair]
+	q.Size = strconv.FormatFloat(math.Abs((upd[2]).(float64)), 'f', -1, 64)
+	q.Price = strconv.FormatFloat((upd[3]).(float64), 'f', -1, 64)
 	m.data[pair] = q
 	m.Unlock()
-	timerCh <- cq.TimerMsg{IsTrade: true, Quote: q}
+	timerCh <- cq.TimerMsg{
+		IsTrade: true,
+		Quote:   q,
+	}
 }
