@@ -40,15 +40,15 @@ func FmtPrice(price string) string {
 }
 
 // FmtDelta calculates price delta and provides appropriate formatting
-func FmtDelta(price string, open string) (string, tcell.Color) {
+func FmtDelta(price string, open string, cfg Config) (string, tcell.Color) {
 	if len(price) > 0 && len(open) > 0 {
 		p, err := strconv.ParseFloat(price, 64)
 		if err != nil {
-			return "no data", tcell.ColorWhite
+			return "no data", cfg.Theme.TextColor
 		}
 		o, err := strconv.ParseFloat(open, 64)
 		if err != nil {
-			return "no data", tcell.ColorWhite
+			return "no data", cfg.Theme.TextColor
 
 		}
 		d := (p - o) / o * 100
@@ -61,11 +61,11 @@ func FmtDelta(price string, open string) (string, tcell.Color) {
 		b.WriteString(delta)
 		b.WriteString("%")
 		if d >= 0 {
-			return b.String(), tcell.ColorGreen
+			return b.String(), cfg.Theme.TextColorUp
 		}
-		return b.String(), tcell.ColorRed
+		return b.String(), cfg.Theme.TextColorDown
 	}
-	return "no data", tcell.ColorWhite
+	return "no data", cfg.Theme.TextColor
 }
 
 // FmtSize formats trade size data with 8 decimal places

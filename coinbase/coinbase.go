@@ -3,11 +3,8 @@ package coinbase
 import (
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/3cb/cq/cq"
-	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
 )
 
 // Market conatins state data
@@ -16,10 +13,10 @@ type Market struct {
 	streaming bool
 	pairs     []string
 	ids       []string
-	data      map[string]cq.Quoter
+	data      map[string]cq.Quote
 }
 
-// Init initializes and returns an instance of the GDAX exchange without quotes
+// Init initializes and returns an instance of the Coinbase exchange without quotes
 func Init() *Market {
 	m := &Market{
 		streaming: false,
@@ -41,13 +38,16 @@ func Init() *Market {
 			"ZRX-BTC",
 		},
 		ids:  []string{},
-		data: make(map[string]cq.Quoter),
+		data: make(map[string]cq.Quote),
 	}
 
+	// Create slice of ids formatted based on pair strings
+	// Instantiate quote for each pair with MarketID and PairID already set
 	for _, pair := range m.pairs {
 		m.ids = append(m.ids, fmtID(pair))
-		m.data[pair] = Quote{
-			ID: fmtID(pair),
+		m.data[pair] = cq.Quote{
+			MarketID: "coinbase",
+			ID:       fmtID(pair),
 		}
 	}
 
@@ -59,97 +59,19 @@ func (m *Market) GetIDs() []string {
 	return m.ids
 }
 
-// Table method uses market data to create and return an
-// instance of tview.Table to caller application
-func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
-	headers := []string{
-		"Pair",
-		"Price",
-		"Change",
-		"Last Size",
-		"Bid",
-		"Ask",
-		"Low",
-		"High",
-		"Volume",
-	}
-
-	table := tview.NewTable().
-		SetBorders(true).
-		SetBordersColor(tcell.ColorLightSlateGray)
-
-	for i, header := range headers {
-		table.SetCell(0, i, tview.NewTableCell(header).
-			SetTextColor(tcell.ColorYellow).
-			SetAlign(tview.AlignRight))
-	}
-
-	for r := 1; r < len(m.pairs)+1; r++ {
-		for c := 0; c <= 8; c++ {
-			table.SetCell(r, c, tview.NewTableCell("-").
-				SetAlign(tview.AlignRight))
-		}
-	}
-
-	// handle errors here ***************
-	m.getSnapshot()
-
+// GetQuotes returns a map used to prime overview table with data
+// Keys are pair IDs separated with "/". Values are of type Quote.
+func (m *Market) GetQuotes() map[string]cq.Quote {
 	m.Lock()
-	data := m.data
+	d := m.data
 	m.Unlock()
-
-	for _, quote := range data {
-		quote.InsertTrade(overviewTbl, table, tcell.AttrNone)()
-	}
-
-	return table
-}
-
-// getSnapshot method performs concurrent http requests the GDAX REST API to get initial
-// market data
-func (m *Market) getSnapshot() []error {
-	var e []error
-
-	m.RLock()
-	pairs := m.pairs
-	m.RUnlock()
-	l := len(pairs)
-	errCh := make(chan error, (9 * l))
-
-	wg := &sync.WaitGroup{}
-	wg.Add(3 * l)
-	// break requests up into bursts to satisfy coinbase throttling
-	for i := 0; i < 5; i++ {
-		go getTrades(m, pairs[i], wg, errCh)
-		go getStats(m, pairs[i], wg, errCh)
-		go getTicker(m, pairs[i], wg, errCh)
-	}
-	time.Sleep(1 * time.Second)
-	for i := 5; i < 10; i++ {
-		go getTrades(m, pairs[i], wg, errCh)
-		go getStats(m, pairs[i], wg, errCh)
-		go getTicker(m, pairs[i], wg, errCh)
-	}
-	time.Sleep(1 * time.Second)
-	for i := 10; i < 15; i++ {
-		go getTrades(m, pairs[i], wg, errCh)
-		go getStats(m, pairs[i], wg, errCh)
-		go getTicker(m, pairs[i], wg, errCh)
-	}
-	wg.Wait()
-
-	close(errCh)
-	for err := range errCh {
-		e = append(e, err)
-	}
-
-	return e
+	return d
 }
 
 // Stream connects to websocket connection and starts goroutine to update state of GDAX
 // market with data from websocket messages
-func (m *Market) Stream(timerCh chan<- cq.TimerMsg) error {
-	err := connectWS(m, timerCh)
+func (m *Market) Stream(routerCh chan<- cq.TimerMsg) error {
+	err := connectWS(m, routerCh)
 	if err != nil {
 		return err
 	}

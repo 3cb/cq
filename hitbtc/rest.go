@@ -89,7 +89,7 @@ func getTicker(m *Market, wg *sync.WaitGroup, errCh chan<- error) {
 		for _, d := range data {
 			if s == d.Symbol {
 				m.Lock()
-				q := (m.data[s]).(Quote)
+				q := m.data[s]
 				q.Ask = d.Ask
 				q.Bid = d.Bid
 				q.Low = d.Low
@@ -132,7 +132,7 @@ func getTrades(m *Market, symbol string, wg *sync.WaitGroup, errCh chan<- error)
 	}
 
 	m.Lock()
-	q := (m.data[symbol]).(Quote)
+	q := m.data[symbol]
 	q.Price = data[0].Price
 	q.Size = data[0].Quantity
 	m.data[symbol] = q

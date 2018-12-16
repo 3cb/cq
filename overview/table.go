@@ -1,13 +1,19 @@
 package overview
 
 import (
+	"github.com/3cb/cq/bitfinex"
 	"github.com/3cb/cq/cq"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
-// Table creates table comparing prices from different crypto exchanges
-func Table() *tview.Table {
+// table wraps a tview.Table and provides extra behavior
+type table struct {
+	*tview.Table
+}
+
+// NewTable creates table comparing prices from different crypto exchanges
+func NewTable(cfg cq.Config) cq.Quoter {
 	rowLbl := []string{
 		"BTC/USD",
 		"BTC/EUR",
@@ -29,45 +35,80 @@ func Table() *tview.Table {
 		"ZRX/USD",
 		"ZRX/BTC",
 	}
+	t := &table{
+		tview.NewTable().
+			SetBorders(true).
+			SetBordersColor(cfg.Theme.BorderColor),
+	}
 
-	table := tview.NewTable().
-		SetBorders(true).
-		SetBordersColor(tcell.ColorLightSlateGray)
+	t.SetBackgroundColor(cfg.Theme.BackgroundColor)
 
-	table.SetCell(0, 1, tview.NewTableCell("  Coinbase").
-		SetTextColor(tcell.ColorYellow).
+	t.SetCell(0, 0, tview.NewTableCell("Pair").
+		SetTextColor(cfg.Theme.HeaderTextColor).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 2, tview.NewTableCell("  Bitfinex").
-		SetTextColor(tcell.ColorYellow).
+	t.SetCell(0, 1, tview.NewTableCell("  Coinbase").
+		SetTextColor(cfg.Theme.HeaderTextColor).
 		SetAlign(tview.AlignRight))
 
-	table.SetCell(0, 3, tview.NewTableCell("    HitBTC").
-		SetTextColor(tcell.ColorYellow).
+	t.SetCell(0, 2, tview.NewTableCell("  Bitfinex").
+		SetTextColor(cfg.Theme.HeaderTextColor).
+		SetAlign(tview.AlignRight))
+
+	t.SetCell(0, 3, tview.NewTableCell("    HitBTC").
+		SetTextColor(cfg.Theme.HeaderTextColor).
 		SetAlign(tview.AlignRight))
 
 	for i, pair := range rowLbl {
 		row := i + 1
-		table.SetCell(row, 0, tview.NewTableCell(pair).
-			SetTextColor(tcell.ColorWhite).
+		t.SetCell(row, 0, tview.NewTableCell(pair).
+			SetTextColor(cfg.Theme.TextColor).
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 1, tview.NewTableCell("-").
+		t.SetCell(row, 1, tview.NewTableCell("-").
+			SetTextColor(cfg.Theme.TextColor).
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 2, tview.NewTableCell("-").
+		t.SetCell(row, 2, tview.NewTableCell("-").
+			SetTextColor(cfg.Theme.TextColor).
 			SetAlign(tview.AlignRight))
 
-		table.SetCell(row, 3, tview.NewTableCell("-").
+		t.SetCell(row, 3, tview.NewTableCell("-").
+			SetTextColor(cfg.Theme.TextColor).
 			SetAlign(tview.AlignRight))
 	}
 
-	return table
+	return t
+}
+
+// InsertQuote updates display of market quotes with new data from UpdateMsg
+func (t *table) InsertQuote(msg cq.UpdateMsg, cfg cq.Config) {
+	row := FindRow(msg.Quote)
+	col := FindColumn(msg.Quote)
+	var color tcell.Color
+
+	if msg.Quote.MarketID == "bitfinex" {
+		_, color = bitfinex.FmtDelta(msg.Quote.ChangePerc, cfg)
+	} else {
+		_, color = cq.FmtDelta(msg.Quote.Price, msg.Quote.Open, cfg)
+	}
+
+	var mask tcell.AttrMask
+	if msg.Flash == true {
+		mask = cfg.CellFlash
+	} else {
+		mask = tcell.AttrNone
+	}
+
+	t.GetCell(row, col).
+		SetText(cq.FmtPrice(msg.Quote.Price)).
+		SetTextColor(color).
+		SetAttributes(mask)
 }
 
 // FindRow uses pair string to find row in table
-func FindRow(quote cq.Quoter) int {
-	switch quote.PairID() {
+func FindRow(q cq.Quote) int {
+	switch q.ID {
 	case "BTC/USD":
 		return 1
 	case "BTC/EUR":
@@ -111,8 +152,8 @@ func FindRow(quote cq.Quoter) int {
 }
 
 // FindColumn uses MarketID string to find column in table
-func FindColumn(quote cq.Quoter) int {
-	switch quote.MarketID() {
+func FindColumn(q cq.Quote) int {
+	switch q.MarketID {
 	case "coinbase":
 		return 1
 	case "bitfinex":

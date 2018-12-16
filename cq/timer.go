@@ -11,23 +11,18 @@ const timerDuration = (300 * time.Millisecond)
 // TimerGroup contains matrix of all the flash timers
 type TimerGroup struct {
 	sync.RWMutex
+
+	// exchange | pair | channel
 	list map[string]map[string]chan TimerMsg
 }
 
-// TimerMsg is used to carry quotes from package websocket loops
-// to TimerGroup event loop
-type TimerMsg struct {
-	IsTrade bool
-	Quote   Quoter
-}
-
 // StartTimerGroup creates double map with timers
-func StartTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerMsg) {
+func StartTimerGroup(exchanges map[string]Exchange) (<-chan UpdateMsg, chan<- TimerMsg) {
 	tg := &TimerGroup{
 		list: make(map[string]map[string]chan TimerMsg),
 	}
 	updateCh := make(chan UpdateMsg, queueSize)
-	routerCh := make(chan TimerMsg, queueSize)
+	timerCh := make(chan TimerMsg, queueSize)
 
 	for k, e := range exchanges {
 		tg.list[k] = make(map[string]chan TimerMsg)
@@ -37,9 +32,9 @@ func StartTimerGroup(exchanges map[string]Exchange) (chan UpdateMsg, chan TimerM
 		}
 	}
 
-	go launchTimers(tg, updateCh, routerCh)
+	go launchTimers(tg, updateCh, timerCh)
 
-	return updateCh, routerCh
+	return updateCh, timerCh
 }
 
 // start goroutine per exchange per trading pair to track flash times
@@ -50,7 +45,7 @@ func launchTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Tim
 		for _, ch := range pairMap {
 			go func(ch <-chan TimerMsg) {
 				var lastTime time.Time
-				var lastQuote Quoter
+				var lastQuote Quote
 
 				timer := time.NewTimer(timerDuration)
 
@@ -61,7 +56,11 @@ func launchTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Tim
 					select {
 					case t := <-timer.C:
 						if t.After(lastTime) {
-							updateCh <- UpdateMsg{UpdType: "trade", Flash: false, Quote: lastQuote}
+							updateCh <- UpdateMsg{
+								IsTrade: true,
+								Flash:   false,
+								Quote:   lastQuote,
+							}
 						}
 					case msg := <-ch:
 						switch msg.IsTrade {
@@ -70,10 +69,18 @@ func launchTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Tim
 							timer.Reset(timerDuration)
 							lastTime = time.Now()
 							lastQuote = msg.Quote
-							updateCh <- UpdateMsg{UpdType: "trade", Flash: true, Quote: msg.Quote}
+							updateCh <- UpdateMsg{
+								Quote:   msg.Quote,
+								IsTrade: true,
+								Flash:   true,
+							}
 						case false:
 							lastQuote = msg.Quote
-							updateCh <- UpdateMsg{UpdType: "ticker", Flash: false, Quote: msg.Quote}
+							updateCh <- UpdateMsg{
+								Quote:   msg.Quote,
+								IsTrade: false,
+								Flash:   false,
+							}
 						}
 					}
 				}
@@ -86,7 +93,7 @@ func launchTimers(tg *TimerGroup, updateCh chan<- UpdateMsg, routerCh <-chan Tim
 	for {
 		msg := <-routerCh
 		tg.RLock()
-		ch := tg.list[msg.Quote.MarketID()][msg.Quote.PairID()]
+		ch := tg.list[msg.Quote.MarketID][msg.Quote.ID]
 		tg.RUnlock()
 		ch <- msg
 	}

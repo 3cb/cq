@@ -129,7 +129,7 @@ func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 				s := (p["symbol"]).(string)
 
 				m.Lock()
-				q := (m.data[s]).(Quote)
+				q := m.data[s]
 				q.Ask = (p["ask"]).(string)
 				q.Bid = (p["bid"]).(string)
 				q.Low = (p["low"]).(string)
@@ -138,7 +138,10 @@ func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 				q.Volume = (p["volume"]).(string)
 				m.data[s] = q
 				m.Unlock()
-				timerCh <- cq.TimerMsg{IsTrade: false, Quote: q}
+				timerCh <- cq.TimerMsg{
+					Quote:   q,
+					IsTrade: false,
+				}
 			case "updateTrades":
 				p := (msg.Params).(map[string]interface{})
 				d := (p["data"]).([]interface{})
@@ -146,12 +149,15 @@ func connectWS(m *Market, timerCh chan<- cq.TimerMsg) error {
 				s := (p["symbol"]).(string)
 
 				m.Lock()
-				q := (m.data[s]).(Quote)
+				q := m.data[s]
 				q.Price = (u["price"]).(string)
 				q.Size = (u["quantity"]).(string)
 				m.data[s] = q
 				m.Unlock()
-				timerCh <- cq.TimerMsg{IsTrade: true, Quote: q}
+				timerCh <- cq.TimerMsg{
+					Quote:   q,
+					IsTrade: true,
+				}
 			default:
 				continue
 			}

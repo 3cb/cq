@@ -1,30 +1,17 @@
 package cq
 
-import (
-	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
-)
+import tview "github.com/rivo/tview"
 
-// UpdateMsg carries quotes from TimerGroup event loop to main cq event loop
-// UpdType and Flash fields allow event loop to set table fonts for quotes
-type UpdateMsg struct {
-	UpdType string // "trade" or "ticker"
-	Flash   bool
-	Quote   Quoter
-}
-
-// Quoter is an interface that market quotes implement to initialize
-// and update data in gui table
+// Quoter defines methods for all display tables in cq application necessary
+// to display price quotes for supported exchanges
+// InsertQuote returns a closure
+// which update the tview.Table with new data.
+// The closure is then passed on to the
+// tview.Application via app.QueueUpdateDraw()
 type Quoter interface {
-	// returns the name of the exchange as all lowercase string
-	MarketID() string
+	// Primitive interface is embedded to ease use of Quoter in main.go
+	tview.Primitive
 
-	// returns name of trading pair all caps separated by "/" (e.g., BTC/USD)
-	PairID() string
-
-	// Insert new quote data into market and overview tables with formatting for flash
-	InsertTrade(*tview.Table, *tview.Table, tcell.AttrMask) func()
-
-	// Insert new quote data into market table without altering flash state
-	InsertTicker(*tview.Table) func()
+	// InsertQuote updates table values as well as styling (i.e., tcell.AttrMask)
+	InsertQuote(UpdateMsg, Config)
 }

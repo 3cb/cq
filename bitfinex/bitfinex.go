@@ -5,8 +5,6 @@ import (
 	"sync"
 
 	"github.com/3cb/cq/cq"
-	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
 )
 
 // Market contains state data
@@ -15,7 +13,7 @@ type Market struct {
 	streaming bool
 	pairs     []string
 	ids       []string
-	data      map[string]cq.Quoter
+	data      map[string]cq.Quote
 }
 
 // Init creates instance of a bitfinex market without quotes
@@ -42,14 +40,14 @@ func Init() *Market {
 			"tZRXBTC",
 		},
 		ids:  []string{},
-		data: make(map[string]cq.Quoter),
+		data: make(map[string]cq.Quote),
 	}
 
 	for _, pair := range m.pairs {
 		m.ids = append(m.ids, fmtID(pair))
-		m.data[pair] = Quote{
-			Symbol: pair,
-			ID:     fmtID(pair),
+		m.data[pair] = cq.Quote{
+			MarketID: "bitfinex",
+			ID:       fmtID(pair),
 		}
 	}
 
@@ -61,49 +59,13 @@ func (m *Market) GetIDs() []string {
 	return m.ids
 }
 
-// Table returns an instance of tview.Table formatted for bitfinex ready for data
-func (m *Market) Table(overviewTbl *tview.Table) *tview.Table {
-	headers := []string{
-		"Pair",
-		"Price",
-		"Change",
-		"Last Size",
-		"Bid",
-		"Ask",
-		"Low",
-		"High",
-		"Volume",
-	}
-
-	tbl := tview.NewTable().
-		SetBorders(true).
-		SetBordersColor(tcell.ColorLightSlateGray)
-
-	for i, header := range headers {
-		tbl.SetCell(0, i, tview.NewTableCell(header).
-			SetTextColor(tcell.ColorYellow).
-			SetAlign(tview.AlignRight))
-	}
-
-	for r := 1; r < len(m.pairs)+1; r++ {
-		for c := 0; c <= 8; c++ {
-			tbl.SetCell(r, c, tview.NewTableCell("").
-				SetAlign(tview.AlignRight))
-		}
-	}
-
-	// handle errors here ***************
-	m.getSnapshot()
-
+// GetQuotes returns a map used to prime overview table with data
+// Keys are pair IDs separated with "/". Values are of type Quote.
+func (m *Market) GetQuotes() map[string]cq.Quote {
 	m.Lock()
-	data := m.data
+	d := m.data
 	m.Unlock()
-
-	for _, quote := range data {
-		quote.InsertTrade(overviewTbl, tbl, tcell.AttrNone)()
-	}
-
-	return tbl
+	return d
 }
 
 // getSnapshot performs http requests to the Bitfinex API to get initial market data
